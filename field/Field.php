@@ -17,8 +17,6 @@ class Field {
 
 	public function addValidator($validator) {
 		$this->validators[] = $validator;
-		
-		var_dump($this->validators);
 		return this;
 	}
 
@@ -32,11 +30,9 @@ class Field {
 
 	public function setValue($value) {
 		$this->value = $value;
-
 	}
 
 	public function hasErrors() {
-		var_dump ( $this->errors);
 		return (count ($this->errors) > 0 ? true : false);
 	}
 
@@ -47,9 +43,7 @@ class Field {
 	public function validate() {
 		if (count($this->validators)) {
 			foreach ($this->validators as $validator) {
-				echo "value: " . $this->value;
 				if ($validator->validate($this->value)==false) {
-					echo "error msg is: " + $validator->getErrorMessage();
 					$this->errors[] = $validator->getErrorMessage();
 				}
 			}

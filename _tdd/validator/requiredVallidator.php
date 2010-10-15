@@ -15,11 +15,13 @@ class ValidatorTestCase extends UnitTestCase {
     
     function testConstructValidatorWithoutMessageGetsNoErrorMessage() {
     	$validator = new RequiredValidator();
-    	$this->assertEqual('', $validator->getErrorMessage());
+    	$validator->setErrorMessage('');
+    	$this->assertEqual('RequiredValidator', $validator->getErrorMessage());
     }
     
     function testConstructValidatorWithMessageGetsErrorMessage() {
-    	$validator = new RequiredValidator('cannot be empty');
+    	$validator = new RequiredValidator();
+    	$validator->setErrorMessage('cannot be empty');
     	$this->assertEqual('cannot be empty', $validator->getErrorMessage());
     }
     

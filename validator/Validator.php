@@ -3,6 +3,7 @@
 interface IValidator {
 	public function validate($value);
 	public function setErrorMessage($errorMessage);
+	public function chain(IValidator $validator);
 	public function getErrorMessage();
 	
 }
@@ -10,11 +11,14 @@ interface IValidator {
 
 // Base class implementation
 abstract class Validator implements IValidator {
-	protected $errorMessage = "";
-	
-	
+	protected $errorMessage;
+	protected $next;
 	public function __construct($errorMessage = '') {
-		$this->errorMessage = $errorMessage;
+	}
+	
+	public function chain (IValidator $validator) {
+		$this->next = $validator;
+		return $validator;
 	}
 	
 	public function setErrorMessage($message) {
@@ -22,8 +26,7 @@ abstract class Validator implements IValidator {
 	}
 	
 	public function getErrorMessage() {
-		echo "error msg: " + $this->errorMessage;
-		return $this->errorMessage=='' ? $this->errorMessage : get_class($this);
+		return $this->errorMessage ? $this->errorMessage : get_class($this);
 	}
 }
 
