@@ -10,6 +10,7 @@ class Field {
 	protected $label = '';
 	protected $hasErrors = "";
 	protected $validators = array();
+	
 
 	public function __construct() {
 
@@ -36,6 +37,10 @@ class Field {
 		return (count ($this->errors) > 0 ? true : false);
 	}
 
+	public function getError() {
+		return $this->errors[0];
+	}
+	
 	public function getErrors() {
 		return ($this->errors);
 	}
@@ -47,23 +52,24 @@ class Field {
 					$this->errors[] = $validator->getErrorMessage();
 				}
 			}
-			return ! $this->hasErrors();
+			return (! $this->hasErrors());
 		// no validator set (yet): Evaluate to true:
 		} else {
 			return true;
 		} 
 		
 	}
-
+	
+	public function hide() {
+		$return .= "<input type='hidden' id=".$this->name . "' class='".$this->name."' value='" . $this->value . "' />";
+	}
 
 	public function render() {
 		$return = "<div class='wrapper " . $this->name . "'>";
 		$return .= "<label  for=". $this->name . ">" . $this->label . "</label>";
 		$return .= "<input type='" . $this->type . "' id=".$this->name . "' class='".$this->name."' value='" . $this->value . "' />";
 		if ($this->hasErrors()) {
-			foreach ($this->errors as $error) {
-				$return .= "<span class='error'>" . $error . "</span>";
-			}
+			$return .= "<span class='error'>" . $this->getError() . "</span>";
 		}
 		$return .= "</div>";
 		return $return;

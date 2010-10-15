@@ -10,7 +10,7 @@ class RegexValidator extends Validator {
 	}
 	
 	public function validate($value) {
-		return preg_match($value, $this->regex);
+		return (preg_match($this->regex, $value) > 0) ? true : false;
 		
 	}
 	
