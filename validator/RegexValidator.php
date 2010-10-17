@@ -5,8 +5,9 @@ class RegexValidator extends Validator {
 	
 	public $regex = '';
 	
-	public function __construct($regex) {
+	public function __construct($regex, $message = 'Regex does not match') {
 		$this->regex = $regex;
+		$this->message = $message;
 	}
 	
 	public function validate($value) {

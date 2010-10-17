@@ -10,7 +10,6 @@ public function render() {
 		if ($this->hasErrors()) {
 			$return .= "<span class='error'>" . $this->getError() . "</span>";
 		}
-		
 		$return .= "</div>";
 		return $return;
 	}
