@@ -1,0 +1,94 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Insert title here</title>
+<style type="text/css">
+span.caption {
+	font-weight: bold;
+	color: red;
+}
+
+ul.errors {
+	border: 1px solid red;
+	padding: 10px;
+	background-color: #FFEEEE;
+	list-style-type: none;
+	width: 780px;
+}
+
+ul.errors li {
+	margin-left: 15px;
+}
+
+ul.errors li a {
+	color: #FF0000;
+	text-decoration: none;
+}
+
+.wrapper {
+	width: 100%;
+	background-color:#EEEEEE;
+	padding-top: 10px;
+	padding-bottom: 5px;
+	border-bottom: 1px solid #AAAAAA;
+}
+
+label {
+	display:block;
+	text-align:right;
+	float:left;
+	width: 300px;
+	padding-right:15px;
+}
+
+input,textarea {
+	width: 475px;
+}
+
+span.error {
+	margin-left: 10px;
+	padding: 5px;
+	border: 1px solid red;
+	background-color: #FFEEEE;
+	width:75px;
+}
+
+</style>
+</head>
+<body>
+
+
+<span class='caption'>Folgende Felder prüfen:</span>
+<ul class='errors'>
+	<li><a href='#Datum'><strong>Datum</strong>: Regex does not
+	much</a></li>
+	<li><a href='#Text'><strong>Text</strong>: Between 5 and 15
+	characters</a></li>
+</ul>
+<form action='' method='post'>
+<div class='wrapper helloWorld'><label for='helloWorld'>hello
+World</label><a name='helloWorld'></a><input type='text' name='helloWorld'
+	id='helloWorld' class='helloWorld' value='hello World' /></div>
+<div class='wrapper Datum'><label for='Datum'>Bitte Datum
+eingeben</label><a name='Datum'></a><input type='text' name='Datum' id='Datum'
+	class='Datum' value='17.03.198' /><span class='error'>Regex
+does not much</span></div>
+<div class='wrapper Text'><label for='Text'>Zwischen 3 und
+15 Zeichen</label><textarea id='Text' name='Text' class='Text' rows='5'
+	cols='35'></textarea><span class='error'>Between 5 and 15
+characters</span></div>
+<div class='wrapper test'><label for=test></label><select
+	name='test' class='test'>
+	<option value="1" selected="selected">1</option>
+	<option value="2">2</option>
+	<option value="3">3</option>
+</select></div>
+<div class='wrapper testr'><label for=testr></label><input
+	type="radio" name="testr" value="1" /><input type="radio" name="testr"
+	value="2" /><input type="radio" name="testr" value="3" /></div>
+<input type='submit' name='helloWorldForm' /></form>
+
+</body>
+</html>

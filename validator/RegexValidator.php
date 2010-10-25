@@ -1,7 +1,7 @@
 <?php 
 require_once('Validator.php');
 class RegexValidator extends Validator {
-	protected $errorMessage = "Regex does not much"; 
+	protected $errorMessage = "Regex does not match"; 
 	
 	public $regex = '';
 	
@@ -13,9 +13,7 @@ class RegexValidator extends Validator {
 	public function validate($value) {
 		return (preg_match($this->regex, $value) > 0) ? true : false;
 		
+		
 	}
-	
-	
-	
 }
 ?>

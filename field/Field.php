@@ -1,5 +1,5 @@
 <?php
-
+require_once('../validator/RequiredValidator.php');
 
 class Field {
 	protected $type="text";
@@ -8,16 +8,24 @@ class Field {
 	protected $name = '';
 	protected $label = '';
 	protected $hasErrors = "";
+	
+	// this will not be validated by a normal validator
+	protected $isOptional = false;
+	
 	protected $validators = array();
 	protected $transformers = array();
 	
 	
 	protected $isStorageFormat = false;
 
-	public function __construct($name='text', $label='Enter text', $value='') {
+	public function __construct($name='text', $label='Enter text', $value='', $isOptional = false) {
 		$this->name = $name;
 		$this->label = $label;
 		$this->value = $value;
+		if ($isOptional==false) {
+			$this->addValidator(new RequiredValidator());
+			$isOptional = false;
+		}
 		$this->init();
 	}
 
@@ -32,6 +40,10 @@ class Field {
 	public function addValidator($validator) {
 		$this->validators[] = $validator;
 		return this;
+	}
+	
+	public function getValidators() {
+		return $this->validators;
 	}
 	
 	public function addTransformer($transformer) {
@@ -53,16 +65,7 @@ class Field {
 	}
 	
 	public function getValue() {
-		if (($this->isStorageFormat==false) || (! $this->transformers)) {
-			return $this->value;
-		} else {
-			// put it through the formatter:
-			foreach ($this->transformers as $t) {
-				$this->value = $t->displayFormat($this->value);
-			}
-			return $this->value;
-		}
-		
+		return $this->value;
 	}
 
 	public function hasErrors() {
@@ -79,19 +82,20 @@ class Field {
 		return ($this->errors);
 	}
 	
+	public function toDisplayFormat() {
+		
+	}
+	
 	public function toStorageFormat() { 
-		echo "storageformat";
-		if ($this->isStorageFormat==true) {
-			return;
-		}
-		$this->isStorageFormat = true;
+		$value = $this->value;
 		if (count($this->transformers)==0) {
-			return;
+			return $this->value;
 		} foreach ($this->transformers as $t) {
 			echo "transforming " . $this->value . " to: ";
 			echo $t->storageFormat($this->value);
-			$this->value = $t->storageFormat($this->value);
-		}
+			$value = $t->storageFormat($value);
+		} 
+		return $value;
 	}
 	
 	public function validate() {
@@ -114,14 +118,35 @@ class Field {
 	public function hide() {
 		return "<input type='hidden' name=".$this->name . "' class='".$this->name."' value='" . $this->getValue() . "' />";
 	}
-
+	
+	// override this function to create a custom label (or non label at all):
+	protected function labelHtml() {
+		return "<label  for='". $this->name . "'>" . $this->label . "</label>";
+	}
+	
+	/** get the html for a field including its attributes:
+	 * just return the rendered field and its value
+	 */
+	protected function toHtml() {
+		$return .= "<input type='" . $this->type . "' name='" . $this->name . "' id='".$this->name . "' class='".$this->name."' value='" . $this->getValue() . "' />";
+		return $return;
+	}
+	
+	/*
+	 * renders the whole field, including surrounding validator js config asf.
+	 * Only override if really necessary - use toHtml() instead.
+	 */
 	public function render() {
-		$return = "<div class='wrapper " . $this->name . "'>";
-		$return .= "<label  for=". $this->name . ">" . $this->label . "</label>";
-		$return .= "<input type='" . $this->type . "' name='" . $this->name . "' id=".$this->name . "' class='".$this->name."' value='" . $this->getValue() . "' />";
+		$hasErrorCss = $this->hasErrors() ? " error " : "";
+		$return = "<div class='wrapper " . $this->name . $hasErrorCss . "'>";
+		$return .= $this->labelHtml();
+		$return .="<a name='". $this->name."'></a>";
+		$return.=$this->toHtml();
+		
 		if ($this->hasErrors()) {
 			$return .= "<span class='error'>" . $this->getError() . "</span>";
 		}
+		
 		$return .= "</div>";
 		return $return;
 	}

@@ -6,6 +6,10 @@ interface IValidator {
 	public function chain(IValidator $validator);
 	public function getErrorMessage();
 	
+	public function getJS($js);
+	
+	
+	
 }
 
 
@@ -14,6 +18,10 @@ abstract class Validator implements IValidator {
 	protected $errorMessage;
 	protected $next;
 	public function __construct($errorMessage = '') {
+	}
+	
+	public function getJS($js) {
+		return '';
 	}
 	
 	public function chain (IValidator $validator) {
@@ -28,6 +36,7 @@ abstract class Validator implements IValidator {
 	public function getErrorMessage() {
 		return $this->errorMessage ? $this->errorMessage : get_class($this);
 	}
+	
 }
 
 
