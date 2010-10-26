@@ -21,7 +21,6 @@ $form->addField(new Field('textfeld', 'Bitte Text eingeben', 'hello World'))
 	->addField(new FieldGroup('test','Bitte Auswahl treffen
 	', array('Bitte wählen' => '', 1 => 1, 2 => 2, 3 => 3)))
 	->addField(new Radio('testr','testr', array(1 => 1, 2 => 2, 3 => 3)));
-	;
 	
 	if ($form->isSubmitted()) {
 			$form->fillFromRequest();
