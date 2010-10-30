@@ -1,0 +1,25 @@
+<cin>
+	<cinForm name="helloWorldForm" action="" 
+	method="get" >
+		<script type="text/javascript" src="../js/lib/jquery-1.4.2.js"></script>
+		<script type="text/javascript" src="../js/lib/jquery.validate.js"></script>
+		<h1>hello form!</h1>
+		<hr />
+		hello World!
+		<cinField name="helloWorld" default="Hello World" type="text">
+			<validator name="length" min="5" max="10" />
+			<vallidator name="required" />
+		</cinField>
+
+		<table>
+			<tr>
+				<td>Just plain html!</td>
+			</tr>
+			<tr>
+				<td>
+					Datum: <cinField name="date" type="date" default="17.03.1980" />
+				</td>
+			</tr>
+		</table>
+	</cinForm>
+</cin>

@@ -7,6 +7,6 @@ class DateTransformer {
 	
 	public function storageFormat($date) {
 		list ($day, $month, $year) = explode('.', $date);
-		return mktime(0,0,0, $month, $day,$year);
+		return mktime(0, 0, 0, $month, $day, $year);
 	}
 }

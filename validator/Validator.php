@@ -3,9 +3,10 @@
 interface IValidator {
 	public function validate($value);
 	public function setErrorMessage($errorMessage);
-	public function chain(IValidator $validator);
 	public function getErrorMessage();
 	
+	// return the client-side validation javascript as array.
+	// TODO: rename to buildJs, because js is returned.
 	public function getJS($js);
 	
 	

@@ -1,5 +1,6 @@
 <?php
-require_once('../validator/RequiredValidator.php');
+require_once( '../validator/RequiredValidator.php');
+require_once( '../transformer/EntitiesTransformer.php');
 
 class Field {
 	protected $type="text";
@@ -15,8 +16,6 @@ class Field {
 	protected $validators = array();
 	protected $transformers = array();
 	
-	
-	protected $isStorageFormat = false;
 
 	public function __construct($name='text', $label='Enter text', $value='', $isOptional = false) {
 		$this->name = $name;
@@ -24,8 +23,9 @@ class Field {
 		$this->value = $value;
 		if ($isOptional==false) {
 			$this->addValidator(new RequiredValidator());
-			$isOptional = false;
+			$this->isOptional = false;
 		}
+		$this->addTransformer(new EntitiesTransformer());
 		$this->init();
 	}
 
@@ -47,7 +47,7 @@ class Field {
 	}
 	
 	public function addTransformer($transformer) {
-		$this->transformers[] = $transformer();
+		$this->transformers[] = $transformer;
 		return this;
 	}
 
@@ -83,7 +83,12 @@ class Field {
 	}
 	
 	public function toDisplayFormat() {
-		
+		$value = $this->value;
+		if (count($this->transformers)==0) {
+			return $this->value;
+		} foreach ($this->transformers as $t) {
+			$value = $t->displayFormat($value);
+		} return $value;
 	}
 	
 	public function toStorageFormat() { 
@@ -127,8 +132,8 @@ class Field {
 	/** get the html for a field including its attributes:
 	 * just return the rendered field and its value
 	 */
-	protected function toHtml() {
-		$return .= "<input type='" . $this->type . "' name='" . $this->name . "' id='".$this->name . "' class='".$this->name."' value='" . $this->getValue() . "' />";
+	public function toHtml() {
+		$return .= "<input type='" . $this->type . "' name='" . $this->name . "' id='".$this->name . "' class='".$this->name."' value='" . $this->toDisplayFormat($this->getValue()) . "' />";
 		return $return;
 	}
 	

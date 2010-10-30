@@ -1,57 +1,63 @@
-<?php 
+<?php
+require_once('/field/Submit.php');
 class Form {
 	protected $fields = array();
 	protected $errorMessage= "Errors occured";
 	protected $name = 'form';
 	protected $method = "post";
 	protected $action = "";
-	
+
 	protected $errors = array();
-	
+
 	public function __construct($name = '', $action ='', $method='post') {
 		$this->name = $name;
 		$this->action = $action;
 		$this->method = $method;
 	}
-	
+
 	public function hasErrors() {
-		return  count($this->errors)> 0 ? true : false; 
+		return  count($this->errors)> 0 ? true : false;
 	}
-	
+
 	public function isSubmitted() {
 		return isset($_REQUEST[$this->name]);
 	}
-	
+
 	public function addField ($field) {
-		$this->fields[] = $field;
+		$this->fields[$field->getName()] = $field;
 		return $this;
 	}
 	
+	public function getField($name) {
+		return $this->fields[$name];
+	}
+
 	public function validate() {
 		$formValid = true;
 		foreach ($this->fields as $field) {
 			$fieldValid = $field->validate();
-			if ($fieldValid==false) { 
+			if ($fieldValid==false) {
 				if ($formValid == true) {
 					$formValid = false;
 				}
 				// just collect the main error of the current field:
 				$this->errors[$field->getName()] = $field->getError();
 			}
-		} 
-		if ($formValid) {
-			return true;
-		} else {
-			return false;
 		}
+		/* 	at this point we have to transform the form to the storage format:
+		 *  please note that the render() method will disoplay the form again correctly,
+		 *  if it contains errors.
+		 */
+
+		return $formValid;
 	}
-	
+
 	public function fillFromRequest() {
 		foreach ($this->fields as $field) {
 			$field->setValue($_REQUEST[$field->getName()]);
 		}
 	}
-	
+
 	public function renderErrors() {
 		$html="";
 		$html.="<span class='caption'>Folgende Felder prüfen:</span>";
@@ -62,24 +68,26 @@ class Form {
 		$html.="</ul>";
 		return $html;
 	}
-	
+
 	// maion mehthod: fills and draws the whole form:
 	public function render() {
 		$html = '';
 		if ($this->hasErrors()) {
 			$html.= $this->renderErrors();
 		}
-		
+
 		$html .= "<form action='" . $this->action ."' method='" . $this->method . "' id='".$this->name."'>";
 		foreach ($this->fields as $field ) {
 			$html.=$field->render();
 		}
 		// add submit button
-		$html.="<input type='submit' name='".$this->name."' />";
+		$submit = new SubmitField();
+		$submit->setName($this->name);
+		$html.= $submit->render();
 		$html.="</form>";
 		return $html;
 	}
-	
+
 	public function toStorageFormat() {
 		foreach($this->fields as $field) {
 			$field->toStorageFormat();
@@ -96,37 +104,156 @@ class JSForm extends Form {
 		$jsMessages = '';
 		$jsRules = '';
 		$jsConfig = array( "rules" => "", "messages" => array());
-		
+
 		foreach ($this->fields as $field) {
 			$validatorJs = array();
 			$validators = $field->getValidators();
 			foreach ($validators as $validator) {
 				$validatorJs = $validator->getJS($validatorJs);
-				
-				// $validatorJS['rule'];
-				// $jsConfig["messages"][$field->getName()] = $validatorJS['message'];
-				var_dump($jsConfig['messages']);
-			} 	
+			}
 			// set the js field config
 			$jsConfig["rules"][$field->getName()] = $validatorJs['rule'];
 			$jsConfig['messages'][$field->getName()] = $validatorJs['message'];
-		} 
-		
+		}
+
 		// return the jQuery script:
 		$script = '<script>';
 		$script .='$(document).ready(function(){';
-			$script .= '$("#'.$this->name.'").validate(';
-				//$script .=	'{rules: {' . $jsRules. '}';//,messages:{'.$jsMessages.'}});';
-				$json = json_encode($jsConfig);
-				// $json = str_replace('"', '', $json);
-				$script.=$json;
-			$script .=")";
+		$script .= '$("#'.$this->name.'").validate(';
+		$json = json_encode($jsConfig);
+		$script.=$json;
+		$script .=")";
 		$script.="})";
 		$script.="</script>";
-		
-		//	$script .= '})});</script>';
 		return $script;
-	} 
-	
+	}
 }
+
+
+// a cinergy form can be loaded by a config-x(ht)ml file.
+class CinForm extends JSForm {
+	private $attributes;
+	private $processCinField = false;
+	private $skipTags = array();
+	private $processLevel = 0;
+	
+	protected $template = "../config/formConfig.xml";
+	protected $currentCinField = null;
+	
+	protected $form = null;
+	
+	public function setConfig($path) {
+		$this->template = $path;
+	}
+	
+	public function render() {
+		// first, we load all cinFields and construct the form:
+		$dom = new DOMDocument();
+		$dom->load($this->template);
+		$xp = new DomXPath($dom);
+		// get form attributes and cinFields by xpath:
+		$formConfigs = $xp->query('//cinForm');
+		
+		// we cannot access linked domNodes with $formConfig = $formConfigs[0], so use break:
+		foreach ($formConfigs as $formConfig) {
+			break;
+		}
+			
+		$form = new JSForm($formConfig->getAttribute('name'), $formConfig->getAttribute('action'), $formConfig->getAttribute('method'));
+		// add all fields to the form:
+		$fieldConfigs = $xp->query('//cinField', $formConfig);
+		foreach ($fieldConfigs as $fieldConfig) {
+			// create the field:
+			
+			$fileName = ucfirst($fieldConfig->getAttribute('type'));
+			$className =  $fileName . 'Field';
+			require_once('/field/' . $fileName . '.php');
+			$name = $fieldConfig->getAttribute('name');
+			$default = $fieldConfig->getAttribute('default');
+			$label = $fieldConfig->getAttribute('label');
+			$field = new $className($name, $label, $default);
+			$field->init(); // add default validators
+			$form->addField($field);
+			// todo: create validators and transformers here.
+		}
+		
+		if ($form->isSubmitted()) {
+			$form->fillFromRequest();
+			$form->validate();
+		}
+		
+		$this->form = $form;
+
+		// after constructing our form, we parse the document by sax, skipping
+		// all cinField tags and replacing them by our form tags:
+		$xml = xml_parser_create( );
+		xml_set_object($xml, $this);
+		xml_set_element_handler($xml, 'open', 'close');
+		xml_set_character_data_handler($xml, 'cdata');
+		xml_parser_set_option($xml, XML_OPTION_CASE_FOLDING, false);
+		
+		// fetch all cinFields and construct object:
+		
+		$fp = fopen($this->template, 'r');
+		$xmlStr = '';
+		while ($data = fread($fp, 4096)) {
+			$xmlStr .= $data;
+		} fclose($fp);
+		
+	
+		xml_parse($xml, $xmlStr, true);
+		xml_parser_free($xml);
+	}
+	
+	public function open($parser, $tag, $attributes) {
+		$this->processLevel++;
+		// skip the root, or fields which are not preocessable:
+		if ($this->processLevel==1 || in_array($tag, $this->skipTags)) {	
+			return;
+		}
+		
+		// output all other tags 'as-is'
+		// however, single tags (e.g. <hr />) will be displayed as <hr></hr>
+		if ($tag=='cinForm') {
+			echo "<form action='" . $attributes['action'] ."' method='" . $attributes['method'] . "' id='".$attributes['name']."'>";
+		} else if ($tag != 'cinField' && ! $this->processCinField) {
+			$attr = '';
+			
+			foreach ($attributes as $name => $value) {
+				$attr.=" " . $name . "=" . '"' . $value. '"';
+			}
+			echo ($attr!='' ? "<" . $tag . " " . $attr . " >" : "<" . $tag . ">");
+		} else if ($tag=='cinField') {
+			$this->currentCinField = $attributes['name'];
+			$this->processCinField = true;
+		}
+	}
+	
+	public function cdata($parser, $text) {
+		echo $text;
+	}
+	
+	public function close($parser, $tag) {
+		$this->processLevel--;
+		// skip root tag and not processing tags:
+		if ($processLevel==1 || in_array($tag, $this->skipTags)) {
+			return;
+		}
+		
+		if ($tag=='cinForm') {
+			$submit = new SubmitField($this->form->name);
+			echo $submit->render();
+			echo "</form>";
+		} else if ($tag != 'cinField' && ! $this->processCinField) {
+			echo "</" . $tag . ">";
+		} else if ($tag=='cinField') {
+			echo $this->form->getJQueryValidation();
+			echo $this->form->getField($this->currentCinField)->render();
+			$this->currentCinField = false;
+			$this->processCinField = false;
+		}
+	}
+}
+
+
 ?>
