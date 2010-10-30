@@ -17,6 +17,13 @@ class LengthValidator extends Validator {
 		$this->max = $max;	
 	}
 	
+	public function setMin($min) {
+		$this->min = $min;
+	}
+	public function setMax($max) {
+		$this->max = $max;
+	}
+	
 	public function getErrorMessage() {
 		if ($this->max && $this->min) {
 			return "Between " . $this->min . " and " . $this->max . " characters";

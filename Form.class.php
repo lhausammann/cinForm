@@ -160,11 +160,10 @@ class CinForm extends JSForm {
 		}
 			
 		$form = new JSForm($formConfig->getAttribute('name'), $formConfig->getAttribute('action'), $formConfig->getAttribute('method'));
-		// add all fields to the form:
+		// find all fields and add them to the form:
 		$fieldConfigs = $xp->query('//cinField', $formConfig);
 		foreach ($fieldConfigs as $fieldConfig) {
-			// create the field:
-			
+			// set up the field:
 			$fileName = ucfirst($fieldConfig->getAttribute('type'));
 			$className =  $fileName . 'Field';
 			require_once('/field/' . $fileName . '.php');
@@ -173,10 +172,29 @@ class CinForm extends JSForm {
 			$label = $fieldConfig->getAttribute('label');
 			$field = new $className($name, $label, $default);
 			$field->init(); // add default validators
+			$validators = $fieldConfig->getElementsByTagName('validator');
+			foreach ($validators as $validatorConfig) {
+				$className = ucfirst($validatorConfig->getAttribute('name')) . "Validator";
+				require_once('../validator/' . $className .".php");
+				
+				$validator = new $className();
+				$validatorConfig->removeAttribute('name');
+				// set up validator properly:
+				foreach ($validatorConfig->attributes as $name => $value ) {
+					// we assume there is a setter method for each 
+					// property to access from the xml file:
+					$call = "set" . ucfirst($name);
+					// parse to string
+					$v = (string) $value->value;
+					$validator->$call($v);
+				}
+				$field->addValidator($validator);
+			} 
+			
 			$form->addField($field);
-			// todo: create validators and transformers here.
 		}
 		
+		// validate the form:
 		if ($form->isSubmitted()) {
 			$form->fillFromRequest();
 			$form->validate();
@@ -184,8 +202,10 @@ class CinForm extends JSForm {
 		
 		$this->form = $form;
 
-		// after constructing our form, we parse the document by sax, skipping
-		// all cinField tags and replacing them by our form tags:
+		// After constructing and validating the form, we process the config
+		// file again, using sax this time: We just convert the cinForm/cinField tags,
+		// and just outputting everything else:
+		
 		$xml = xml_parser_create( );
 		xml_set_object($xml, $this);
 		xml_set_element_handler($xml, 'open', 'close');

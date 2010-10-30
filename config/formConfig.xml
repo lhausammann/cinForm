@@ -4,6 +4,7 @@
 		<script type="text/javascript" src="../js/lib/jquery-1.4.2.js"></script>
 		<script type="text/javascript" src="../js/lib/jquery.validate.js"></script>
 		<h1>hello form!</h1>
+		Demonstration der CinForm mit <span style="color:red">xhtml Konfiguration</span>
 		<hr />
 		hello World!
 		<cinField name="helloWorld" default="Hello World" type="text">
@@ -11,7 +12,7 @@
 			<vallidator name="required" />
 		</cinField>
 
-		<table>
+		<table border="1">
 			<tr>
 				<td>Just plain html!</td>
 			</tr>
@@ -19,7 +20,9 @@
 				<td>
 					Datum: <cinField name="date" type="date" default="17.03.1980" />
 				</td>
+				<td>Link</td>
 			</tr>
 		</table>
+		<hr />
 	</cinForm>
 </cin>
