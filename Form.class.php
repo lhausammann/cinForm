@@ -35,20 +35,19 @@ class Form {
 	public function validate() {
 		$formValid = true;
 		foreach ($this->fields as $field) {
-			$fieldValid = $field->validate();
-			if ($fieldValid==false) {
-				if ($formValid == true) {
-					$formValid = false;
-				}
+			
+			if ($field->validate()==false) {
+				$formValid = false;
 				// just collect the main error of the current field:
 				$this->errors[$field->getName()] = $field->getError();
 			}
 		}
 		/* 	at this point we have to transform the form to the storage format:
-		 *  please note that the render() method will disoplay the form again correctly,
-		 *  if it contains errors.
+		 *  note that the render() method will display the form again correctly,
+		 *  if it is displayed correctly.
 		 */
-
+		// TODO handle this in a field state, which is more transparent.
+		$this->toStorageFormat();
 		return $formValid;
 	}
 
@@ -90,7 +89,7 @@ class Form {
 
 	public function toStorageFormat() {
 		foreach($this->fields as $field) {
-			$field->toStorageFormat();
+			$field->setValue($field->toStorageFormat());
 		}
 	}
 }
@@ -171,7 +170,6 @@ class CinForm extends JSForm {
 			$default = $fieldConfig->getAttribute('default');
 			$label = $fieldConfig->getAttribute('label');
 			$field = new $className($name, $label, $default);
-			$field->init(); // add default validators
 			$validators = $fieldConfig->getElementsByTagName('validator');
 			foreach ($validators as $validatorConfig) {
 				$className = ucfirst($validatorConfig->getAttribute('name')) . "Validator";

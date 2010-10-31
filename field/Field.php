@@ -20,21 +20,36 @@ class Field {
 	public function __construct($name='text', $label='Enter text', $value='', $isOptional = false) {
 		$this->name = $name;
 		$this->label = $label;
-		$this->value = $value;
+		// $this->value = $value;
+
+		
 		if ($isOptional==false) {
 			$this->addValidator(new RequiredValidator());
 			$this->isOptional = false;
 		}
+		// the defaultg transformer escapes and unescapes input
 		$this->addTransformer(new EntitiesTransformer());
 		$this->init();
+		
+		// after initing, we can set the default value properly:
+		$this->setDefaultValue($value);
 	}
 
 	// initailize custom validators and transformers here
 	public function init() {	
 	}
 	
+	
+	
 	public function getName() {
 		return $this->name;
+	}
+	
+	public function setDefaultValue($value) {
+		// first set the value, then toStorageFormat transforms it
+		// to the correct format:
+		$this->value = $value;
+		$this->value = $this->toStorageFormat();
 	}
 	
 	public function addValidator($validator) {
@@ -60,7 +75,6 @@ class Field {
 	}
 
 	public function setValue($value) {
-		echo "setze value: " . $value;
 		$this->value = $value;
 	}
 	
@@ -87,7 +101,7 @@ class Field {
 		if (count($this->transformers)==0) {
 			return $this->value;
 		} foreach ($this->transformers as $t) {
-			$value = $t->displayFormat($value);
+			$value = $t->displayFormat($value, $this);
 		} return $value;
 	}
 	
@@ -96,9 +110,8 @@ class Field {
 		if (count($this->transformers)==0) {
 			return $this->value;
 		} foreach ($this->transformers as $t) {
-			echo "transforming " . $this->value . " to: ";
-			echo $t->storageFormat($this->value);
-			$value = $t->storageFormat($value);
+			
+			$value = $t->storageFormat($value, $this);
 		} 
 		return $value;
 	}

@@ -1,8 +1,11 @@
 <cin>
 	<cinForm name="helloWorldForm" action="" 
-	method="get" >
+	method="get">
+	
+	<!--  
 		<script type="text/javascript" src="../js/lib/jquery-1.4.2.js"></script>
 		<script type="text/javascript" src="../js/lib/jquery.validate.js"></script>
+	-->		
 		<h1>hello form!</h1>
 		Demonstration der CinForm mit <span style="color:red">xhtml Konfiguration</span>
 		<hr />

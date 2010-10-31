@@ -42,7 +42,6 @@ $form->addField(new Field('textfeld', 'Bitte Text eingeben', 'hello World'))
 	
 	$form = new CinForm();
 	$form->setConfig(getenv('DOCUMENT_ROOT') . '/Form/config/formConfig.xml');
-	
 	$form->render();
 	
 //include('testForm_tpl.php');
