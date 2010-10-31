@@ -2,23 +2,19 @@
 // converts a timestamp to a date
 class DateTransformer {
 	
-	public function displayFormat($timestamp, $field) {
+	public function displayFormat($timestampOrInvalid, $field) {
+		// only transform valid timestamps to the display format:
 		if ($field->hasErrors()==false) {
-			echo 'transforming timestamp to display: ' . $timestamp;
-			return date('d.m.Y', $timestamp);
+			return date('d.m.Y', $timestampOrInvalid);
 		} else {
-			// if the field has been filled out with errors,
-			// we show it again. (in this, case, timerstamp looks lie "17.03",
-			// and processing it will result in something like 01.01.1970 
-			echo 'field has errors';
-			echo $timestamp;
-			return $timestamp;
+			// if the field contains errors,
+			// we show the unchanged value again. 
+			return $timestampOrInvalid;
 		}
 		
 	}
 	
 	public function storageFormat($date, $field) {
-		echo "transforming date to storage: " . $date;
 		// only transform valid fields to the storage format:
 		if ($field->hasErrors()==false) {
 			list ($day, $month, $year) = explode('.', $date);
@@ -26,7 +22,6 @@ class DateTransformer {
 		} 
 		// if an invalid entry has been specified, we 
 		// show it untransformed:
-		echo $date;
 		return $date;
 	}
 }

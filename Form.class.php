@@ -28,8 +28,16 @@ class Form {
 		return $this;
 	}
 	
+	public function getFields() {
+		return $this->fields;
+	}
+	
 	public function getField($name) {
 		return $this->fields[$name];
+	}
+	
+	public function getName() {
+		return $this->name;
 	}
 
 	public function validate() {
@@ -38,6 +46,7 @@ class Form {
 			
 			if ($field->validate()==false) {
 				$formValid = false;
+				echo 'error on field: ' . $field->getName();
 				// just collect the main error of the current field:
 				$this->errors[$field->getName()] = $field->getError();
 			}
@@ -46,7 +55,7 @@ class Form {
 		 *  note that the render() method will display the form again correctly,
 		 *  if it is displayed correctly.
 		 */
-		// TODO handle this in a field state, which is more transparent.
+		// TODO is there a simpler solution around ???
 		$this->toStorageFormat();
 		return $formValid;
 	}
@@ -55,6 +64,14 @@ class Form {
 		foreach ($this->fields as $field) {
 			$field->setValue($_REQUEST[$field->getName()]);
 		}
+	}
+	
+	public function hide($additionalHtml) {
+		$html .= "<form action='" . $this->action ."' method='" . $this->method . "' id='".$this->name."'>";
+		foreach ($this->fields as $field) {
+			$html.=$field->hide();
+		}
+		return $html . $additionalHtml . "</form>";
 	}
 
 	public function renderErrors() {
@@ -141,11 +158,16 @@ class CinForm extends JSForm {
 	
 	protected $form = null;
 	
+	public function __construct($path='') {
+		$this->setConfig($path);
+		$this->init();
+	}
+	
 	public function setConfig($path) {
 		$this->template = $path;
 	}
 	
-	public function render() {
+	public function init() {
 		// first, we load all cinFields and construct the form:
 		$dom = new DOMDocument();
 		$dom->load($this->template);
@@ -158,7 +180,11 @@ class CinForm extends JSForm {
 			break;
 		}
 			
-		$form = new JSForm($formConfig->getAttribute('name'), $formConfig->getAttribute('action'), $formConfig->getAttribute('method'));
+		$this->name = $formConfig->getAttribute('name');
+		$this->action = $formConfig->getAttribute('action');
+		$this->method = $formConfig->getAttribute('method');
+		
+		
 		// find all fields and add them to the form:
 		$fieldConfigs = $xp->query('//cinField', $formConfig);
 		foreach ($fieldConfigs as $fieldConfig) {
@@ -187,19 +213,12 @@ class CinForm extends JSForm {
 					$validator->$call($v);
 				}
 				$field->addValidator($validator);
-			} 
-			
-			$form->addField($field);
+			} 	
+			$this->addField($field);
 		}
-		
-		// validate the form:
-		if ($form->isSubmitted()) {
-			$form->fillFromRequest();
-			$form->validate();
-		}
-		
-		$this->form = $form;
-
+	}
+	
+	public function render() {
 		// After constructing and validating the form, we process the config
 		// file again, using sax this time: We just convert the cinForm/cinField tags,
 		// and just outputting everything else:
@@ -259,14 +278,14 @@ class CinForm extends JSForm {
 		}
 		
 		if ($tag=='cinForm') {
-			$submit = new SubmitField($this->form->name);
+			$submit = new SubmitField($this->name);
 			echo $submit->render();
 			echo "</form>";
 		} else if ($tag != 'cinField' && ! $this->processCinField) {
 			echo "</" . $tag . ">";
 		} else if ($tag=='cinField') {
-			echo $this->form->getJQueryValidation();
-			echo $this->form->getField($this->currentCinField)->render();
+			echo $this->getJQueryValidation();
+			echo $this->getField($this->currentCinField)->render();
 			$this->currentCinField = false;
 			$this->processCinField = false;
 		}

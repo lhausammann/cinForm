@@ -3,6 +3,9 @@ require_once( '../validator/RequiredValidator.php');
 require_once( '../transformer/EntitiesTransformer.php');
 
 class Field {
+	const DISPLAY_FORMAT = 1;
+	const STORAGE_FORMAT = 2;
+	
 	protected $type="text";
 	protected $value='';
 	protected $errors = array();
@@ -10,14 +13,18 @@ class Field {
 	protected $label = '';
 	protected $hasErrors = "";
 	
-	// this will not be validated by a normal validator
+	// contains information about the format of the field value:
+	// after validating the form
+	public $fieldState = self::DISPLAY_FORMAT;
+	
+	// wether or not the required validator should be added:
 	protected $isOptional = false;
 	
 	protected $validators = array();
 	protected $transformers = array();
 	
 
-	public function __construct($name='text', $label='Enter text', $value='', $isOptional = false) {
+	public function __construct($name, $label='label', $value='', $isOptional = false) {
 		$this->name = $name;
 		$this->label = $label;
 		// $this->value = $value;
@@ -27,7 +34,7 @@ class Field {
 			$this->addValidator(new RequiredValidator());
 			$this->isOptional = false;
 		}
-		// the defaultg transformer escapes and unescapes input
+		// the defaultg transformer escapes and unescapes html input
 		$this->addTransformer(new EntitiesTransformer());
 		$this->init();
 		
@@ -134,7 +141,7 @@ class Field {
 	// to be displayed as a date):
 	
 	public function hide() {
-		return "<input type='hidden' name=".$this->name . "' class='".$this->name."' value='" . $this->getValue() . "' />";
+		return "<input type='hidden' name='".$this->name . "' class='".$this->name."' value='" . $this->getValue() . "' />";
 	}
 	
 	// override this function to create a custom label (or non label at all):

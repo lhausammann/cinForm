@@ -1,20 +1,19 @@
 <cin>
-	<cinForm name="helloWorldForm" action="" 
-	method="get">
-	
-	<!--  
+	<cinForm name="helloWorldForm" action="" method="get">
+	<!-- 
 		<script type="text/javascript" src="../js/lib/jquery-1.4.2.js"></script>
-		<script type="text/javascript" src="../js/lib/jquery.validate.js"></script>
-	-->		
+		<script type="text/javascript" src="../js/lib/jquery.validate.js"></script>	
 		<h1>hello form!</h1>
+	-->
 		Demonstration der CinForm mit <span style="color:red">xhtml Konfiguration</span>
 		<hr />
 		hello World!
+		<h2>Und hier das Formular:</h2>
 		<cinField name="helloWorld" default="Hello World" type="text">
 			<validator name="length" min="5" max="10" />
 			<vallidator name="required" />
 		</cinField>
-
+		<hr />
 		<table border="1">
 			<tr>
 				<td>Just plain html!</td>
