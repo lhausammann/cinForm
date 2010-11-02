@@ -156,6 +156,13 @@ class CinForm extends JSForm {
 	protected $template = "../config/formConfig.xml";
 	protected $currentCinField = null;
 	
+	protected $specialClassNames = array(
+		
+		'textarea' => array('class' => 'Textarea', 'file' => 'TextArea.php' ),
+		'select' => array('class' => 'Select', 'file' => 'FieldGroup.php'),
+		'radio' => array('class' => 'Radio', 'file' => 'FieldGroup.php')
+	);
+	
 	protected $form = null;
 	
 	public function __construct($path='') {
@@ -189,13 +196,31 @@ class CinForm extends JSForm {
 		$fieldConfigs = $xp->query('//cinField', $formConfig);
 		foreach ($fieldConfigs as $fieldConfig) {
 			// set up the field:
-			$fileName = ucfirst($fieldConfig->getAttribute('type'));
-			$className =  $fileName . 'Field';
-			require_once('/field/' . $fileName . '.php');
+			$typeName = $fieldConfig->getAttribute('type');
+			$fieldConfig->removeAttribute('type');
+	
+			if (!array_key_exists($typeName, $this->specialClassNames)) {
+				$className =  ucfirst($typeName) . 'Field';
+				$fileName = $typeName . '.php';
+			} else {
+				$className = $this->specialClassNames[$typeName]['class'];
+				$fileName = $this->specialClassNames[$typeName]['file'];
+			}
+			require_once('/field/' . $fileName);
 			$name = $fieldConfig->getAttribute('name');
 			$default = $fieldConfig->getAttribute('default');
 			$label = $fieldConfig->getAttribute('label');
 			$field = new $className($name, $label, $default);
+			// process other fields:
+			foreach (array('name','default','label') as $name){
+				$fieldConfig->removeAttribute($name);
+			}
+			
+			foreach ($fieldConfig->attributes as $name => $value) {
+				$call = 'set' . ucfirst($name);
+				$field->$call($value->value);
+			}
+			
 			$validators = $fieldConfig->getElementsByTagName('validator');
 			foreach ($validators as $validatorConfig) {
 				$className = ucfirst($validatorConfig->getAttribute('name')) . "Validator";
@@ -214,6 +239,17 @@ class CinForm extends JSForm {
 				}
 				$field->addValidator($validator);
 			} 	
+			
+			$options = $fieldConfig->getElementsByTagName('option');
+			$opts = array();
+			foreach ($options as $option) {
+				$opts[$option->getAttribute('name')] = $option->getAttribute('value');
+			}
+			
+			if (count($opts)) {
+				$field->setOptions($opts);
+			} 	
+			
 			$this->addField($field);
 		}
 	}

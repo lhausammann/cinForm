@@ -52,12 +52,19 @@ class Option {
 
 class FieldGroup extends Field {
 
-public function __construct($name, $label='', $values = array()) {
-	parent::__construct($name, $label);
-	foreach ($values as $key => $value) {
-		$this->options[] = new Option($key, $value);
+	public function __construct($name, $label='', $values = array()) {
+		parent::__construct($name, $label);
+		if ($values) {
+			$this->setOptions($values); 
+		}
 	}
-}	
+	
+	public function setOptions($values) {
+		foreach ($values as $key => $value) {
+			$this->options[] = new Option($key, $value);
+		}
+	}
+	
 	
 public function toHtml() {
 		$return .= "<select name='".$this->name .  "' id='".$this->name."' class='".$this->name."'>";
@@ -73,14 +80,24 @@ public function toHtml() {
 	}
 }
 
+// alias
+class Select extends FieldGroup {}
+
 class Radio extends Field {
-public function __construct($name, $label='', $options = array()) {
+public function __construct($name, $label='', $options = null) {
 	$this->name = $name;
-	$this->options = array();
-	foreach ($options as $legend => $value) {
-		$this->options[] = new Option($this->name, $value, 'radio', $legend);
+	
+	if (count($options) > 0) {
+		$this->setOptions($options);
 	}
 }	
+
+public function setOptions($options) {
+	if (count($options))
+foreach ($options as $legend => $value) {
+		$this->options[] = new Option($this->name, $value, 'radio', $legend);
+	}
+}
 //  do not display a label on a radio group
 // (every button has its own label:
 protected function labelHtml() {}

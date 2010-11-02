@@ -22,7 +22,7 @@ abstract class Validator implements IValidator {
 	}
 	
 	public function getJS($js) {
-		return '';
+		return $js;
 	}
 	
 	public function chain (IValidator $validator) {

@@ -1,10 +1,29 @@
 <cin>
-	<cinForm name="helloWorldForm" action="" method="get">
-	<!-- 
-		<script type="text/javascript" src="../js/lib/jquery-1.4.2.js"></script>
-		<script type="text/javascript" src="../js/lib/jquery.validate.js"></script>	
+	<html>
+		<head>
+		<!-- Load TinyMCE -->
+<script type="text/javascript" src="../js/lib/jquery-1.4.2.js"></script>
+<!-- 
+<script type="text/javascript" src="../js/lib/jquery.validate.js"></script>
+-->
+<script type="text/javascript" src="../js/lib/tiny_mce/jquery.tinymce.js"></script>
+<script type="text/javascript">
+	$().ready(function() {
+		$('textarea.rte').tinymce({
+			// Location of TinyMCE script
+			script_url : '../js/lib/tiny_mce/tiny_mce.js',
+			// General options
+			theme : "simple",
+		})
+	});
+			</script>
+		</head>
+	<cinForm name="helloWorldForm" action="" method="post">
+	
 		<h1>hello form!</h1>
-	-->
+	
+	
+		
 		Demonstration der CinForm mit <span style="color:red">xhtml Konfiguration</span>
 		<hr />
 		hello World!
@@ -23,8 +42,23 @@
 					Datum: <cinField name="date" type="date" default="17.03.1980" />
 				</td>
 				<td>Link</td>
+				<td>
+					<cinField name="normalText" type="textarea" />
+					<cinField name="longtext" type="textarea" rte="true" rows="20" default="hello &amp;lth;1&amp;gt;world" />
+				</td>
 			</tr>
 		</table>
+		
+		<cinField type='select' name="select" label="select">
+			<option name="hallo" value="hello" />
+			<option name="Welt" value="World" />
+		</cinField>
+		
+		<!-- use a datasouce, which is attached to the form using setVar -->
+		<cinField type="radio" name="radio" label="radio" from="formData" />
+		</cinField>
+		
 		<hr />
 	</cinForm>
+	</html>
 </cin>

@@ -36,6 +36,9 @@ class LengthValidator extends Validator {
 		
 		$js['message']['minlength'] = $this->getErrorMessage();
 		$js['rule']["minlength"] = $this->min;
+		$js['message']['maxlength'] = $this->getErrorMessage();
+		$js['rule']["maxlength"] = $this->max;
+		
 		return $js;
 	}
 	

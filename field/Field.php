@@ -12,6 +12,11 @@ class Field {
 	protected $name = '';
 	protected $label = '';
 	protected $hasErrors = "";
+	protected $cssClasses = array();
+	
+	protected function compileCss() {
+		return " " . $this->name . " " . implode(" ", $this->cssClasses) . " ";
+	}
 	
 	// contains information about the format of the field value:
 	// after validating the form
@@ -24,6 +29,7 @@ class Field {
 	protected $transformers = array();
 	
 
+	
 	public function __construct($name, $label='label', $value='', $isOptional = false) {
 		$this->name = $name;
 		$this->label = $label;
@@ -153,7 +159,7 @@ class Field {
 	 * just return the rendered field and its value
 	 */
 	public function toHtml() {
-		$return .= "<input type='" . $this->type . "' name='" . $this->name . "' id='".$this->name . "' class='".$this->name."' value='" . $this->toDisplayFormat($this->getValue()) . "' />";
+		$return .= "<input type='" . $this->type . "' name='" . $this->name . "' id='".$this->name . "' class='" . $this->compileCss() . "' value='" . $this->toDisplayFormat($this->getValue()) . "' />";
 		return $return;
 	}
 	
