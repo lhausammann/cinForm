@@ -25,6 +25,7 @@ public function toHtml() {
 		$this->rte = $rte;
 		if ($rte) {
 			$this->cssClasses[] = 'rte';
+			$this->removeTransformer('entity');
 		}
 	}
 }

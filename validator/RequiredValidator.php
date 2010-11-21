@@ -3,9 +3,9 @@
 require_once('Validator.php');
 
 class RequiredValidator extends Validator {
+	protected $name='required';
 	protected $errorMessage = "cannot be empty";
-	
-	
+
 
 	 
 	public function getJS($js) {

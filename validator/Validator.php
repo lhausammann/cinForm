@@ -16,9 +16,17 @@ interface IValidator {
 
 // Base class implementation
 abstract class Validator implements IValidator {
+	
+	
 	protected $errorMessage;
-	protected $next;
+	protected $name;
 	public function __construct($errorMessage = '') {
+		if ($this->errorMessage)
+			$this->errorMessage = $errorMessage;
+	}
+	
+	public function getName() {
+		return $this->name;
 	}
 	
 	public function getJS($js) {

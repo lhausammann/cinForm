@@ -40,8 +40,12 @@ $form->addField(new Field('textfeld', 'Bitte Text eingeben', 'hello World'))
 			}
 	}
 
-	$form = new CinForm(getenv('DOCUMENT_ROOT') . '/Form/config/formConfig.xml');
+	$start = microtime(true);
+	$formParser = new CinForm(getenv('DOCUMENT_ROOT') . '/Form/config/formConfig.xml');
+	$form = $formParser->getForm();
+	
 	$isOk = false;
+	
 	// validate the form:
 	if ($form->isSubmitted() || isset($_REQUEST['showAgain'])) {
 		$form->fillFromRequest();
@@ -60,9 +64,10 @@ $form->addField(new Field('textfeld', 'Bitte Text eingeben', 'hello World'))
 		
 		<?php
 	} else {
-		$form->render();
+		echo $formParser->render();
 	}
-
+	
+	echo microtime(true)-$start;
 	
 //include('testForm_tpl.php');
 

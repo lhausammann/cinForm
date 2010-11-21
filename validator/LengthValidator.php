@@ -4,9 +4,10 @@ require_once('Validator.php');
 
 class LengthValidator extends Validator {
 	
+	protected $name = 'length';	
 	public $min = 1;
 	public $max = 255;
-	
+
 	
 	public function __construct($min=1, $max=255) {
 		if ( ! $min && ! $max) {
@@ -16,7 +17,7 @@ class LengthValidator extends Validator {
 		$this->min = $min;
 		$this->max = $max;	
 	}
-	
+
 	public function setMin($min) {
 		$this->min = $min;
 	}
@@ -33,12 +34,10 @@ class LengthValidator extends Validator {
 	}
 	
 	public function getJS($js) {
-		
 		$js['message']['minlength'] = $this->getErrorMessage();
 		$js['rule']["minlength"] = $this->min;
 		$js['message']['maxlength'] = $this->getErrorMessage();
 		$js['rule']["maxlength"] = $this->max;
-		
 		return $js;
 	}
 	

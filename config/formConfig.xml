@@ -3,12 +3,22 @@
 		<head>
 		<!-- Load TinyMCE -->
 <script type="text/javascript" src="../js/lib/jquery-1.4.2.js"></script>
-<!-- 
+
 <script type="text/javascript" src="../js/lib/jquery.validate.js"></script>
--->
+
 <script type="text/javascript" src="../js/lib/tiny_mce/jquery.tinymce.js"></script>
 <script type="text/javascript">
-	$().ready(function() {
+	$(document).ready(function() {
+		$.validator.addMethod(
+        "regex",
+        function(value, element, regexp) {
+            var re = new RegExp(regexp);
+            return this.optional(element) || re.test(value);
+        },
+        "Please check your input."
+);
+		
+	
 		$('textarea.rte').tinymce({
 			// Location of TinyMCE script
 			script_url : '../js/lib/tiny_mce/tiny_mce.js',
@@ -18,7 +28,7 @@
 	});
 			</script>
 		</head>
-	<cinForm name="helloWorldForm" action="" method="post">
+	<cinForm name="helloWorldForm" action="" method="post" type="Form">
 	
 		<h1>hello form!</h1>
 	
@@ -26,8 +36,16 @@
 		
 		Demonstration der CinForm mit <span style="color:red">xhtml Konfiguration</span>
 		<hr />
+		Alles ausser den 'cin*' Elementen ist <i>bloss Html</i>. Die cinForm Blöcke dazwischen 
+		sind die deklarative Form-Konfiguration und werden als solche ausgegeben.
+		Zurzeit suchen wir noch nach einer <u>Lösung</u> für die js-Konfiguration: Die Validatoren stellen
+		zwar das Js für die Validierung zur Verfügung, nicht aber das einzubindende Head Script. Möglicherweise
+		ist eine Konfiguration getHeaderJs auf dem Formular erforderlich. Alle Elemente könnten dann mit addHeadJs()/includeHeadJs() ihre Library registrieren.
 		hello World!
 		<h2>Und hier das Formular:</h2>
+		
+		<cinErrors />
+		
 		<cinField name="helloWorld" default="Hello World" type="text">
 			<validator name="length" min="5" max="10" />
 			<vallidator name="required" />
@@ -39,12 +57,20 @@
 			</tr>
 			<tr>
 				<td>
-					Datum: <cinField name="date" type="date" default="17.03.1980" />
+					Datum: <cinField name="datum" type="date" default="18.02.1955" storageFormat="date" />
 				</td>
+			</tr>
+			<tr>
+				<td>
+					Datum (mysql date storage): 
+					<cinField name="datum2" type="date" default="17.03.1980" storageFormat="date" />
+				</td>
+			</tr>
+			<tr>
 				<td>Link</td>
 				<td>
 					<cinField name="normalText" type="textarea" />
-					<cinField name="longtext" type="textarea" rte="true" rows="20" default="hello &amp;lth;1&amp;gt;world" />
+					<cinField name="longtext" type="textarea" rte="true" rows="20" default="hello &amp;lt;1&amp;gt;world" />
 				</td>
 			</tr>
 		</table>
@@ -55,8 +81,7 @@
 		</cinField>
 		
 		<!-- use a datasouce, which is attached to the form using setVar -->
-		<cinField type="radio" name="radio" label="radio" from="formData" />
-		</cinField>
+		
 		
 		<hr />
 	</cinForm>

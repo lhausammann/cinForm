@@ -27,6 +27,7 @@ class Field {
 	
 	protected $validators = array();
 	protected $transformers = array();
+	protected $defaultValue = '';
 	
 
 	
@@ -37,7 +38,7 @@ class Field {
 
 		
 		if ($isOptional==false) {
-			$this->addValidator(new RequiredValidator());
+			$this->addValidator(new RequiredValidator('please enter a value'));
 			$this->isOptional = false;
 		}
 		// the defaultg transformer escapes and unescapes html input
@@ -61,13 +62,19 @@ class Field {
 	public function setDefaultValue($value) {
 		// first set the value, then toStorageFormat transforms it
 		// to the correct format:
+		$this->defaultValue = $value;
 		$this->value = $value;
 		$this->value = $this->toStorageFormat();
 	}
 	
 	public function addValidator($validator) {
-		$this->validators[] = $validator;
-		return this;
+		$this->validators[$validator->getName()] = $validator;
+		return $this;
+	}
+	
+	public function removeValidator($name) {
+		unset ($this->validators[$name]);
+		return $this;
 	}
 	
 	public function getValidators() {
@@ -75,8 +82,21 @@ class Field {
 	}
 	
 	public function addTransformer($transformer) {
-		$this->transformers[] = $transformer;
-		return this;
+		$this->transformers[$transformer->getName()] = $transformer;
+		return $this;
+	}
+	
+	public function removeTransformer($name) {
+		// unset ($this->transformers[$name]); does not work
+		$tmp = array();
+		// @todo: Use array_splice
+		foreach ($this->transformers as $key => $value) {
+			if ($key == $name) {
+				continue;
+			} $tmp[$key] = $value;
+		}
+		$this->transformers = $tmp;
+		return $this;
 	}
 
 	public function setName($name) {
@@ -122,8 +142,9 @@ class Field {
 		$value = $this->value;
 		if (count($this->transformers)==0) {
 			return $this->value;
-		} foreach ($this->transformers as $t) {
-			
+		}
+		
+		foreach ($this->transformers as $t) {
 			$value = $t->storageFormat($value, $this);
 		} 
 		return $value;

@@ -1,7 +1,10 @@
 <?php
 // converts a timestamp to a date
-class DateTransformer {
-	
+class TimestampTransformer {
+	protected $name = 'timestamp';
+	public function getName() {
+		return $this->name;
+	}
 	public function displayFormat($timestampOrInvalid, $field) {
 		// only transform valid timestamps to the display format:
 		if ($field->hasErrors()==false) {
