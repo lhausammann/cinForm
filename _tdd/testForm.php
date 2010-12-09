@@ -43,7 +43,6 @@ $form->addField(new Field('textfeld', 'Bitte Text eingeben', 'hello World'))
 	$start = microtime(true);
 	$formParser = new CinForm(getenv('DOCUMENT_ROOT') . '/Form/config/formConfig.xml');
 	$form = $formParser->getForm();
-	
 	$isOk = false;
 	
 	// validate the form:

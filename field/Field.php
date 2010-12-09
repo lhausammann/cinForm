@@ -1,6 +1,8 @@
 <?php
 require_once( '../validator/RequiredValidator.php');
 require_once( '../transformer/EntitiesTransformer.php');
+require_once( '../renderer/ClearDefaultRenderer.php' );
+require_once( '../renderer/RedBorderRenderer.php' );
 
 class Field {
 	const DISPLAY_FORMAT = 1;
@@ -13,13 +15,10 @@ class Field {
 	protected $label = '';
 	protected $hasErrors = "";
 	protected $cssClasses = array();
-	
-	protected function compileCss() {
-		return " " . $this->name . " " . implode(" ", $this->cssClasses) . " ";
-	}
-	
+	protected $defaultValue;
 	// contains information about the format of the field value:
 	// after validating the form
+	
 	public $fieldState = self::DISPLAY_FORMAT;
 	
 	// wether or not the required validator should be added:
@@ -27,7 +26,43 @@ class Field {
 	
 	protected $validators = array();
 	protected $transformers = array();
-	protected $defaultValue = '';
+	
+	
+	
+	public function getType() {
+		return $this->type;
+	}
+	
+	public function getValue() {
+		return $this->value;
+	}
+	
+	public function getErrors() {
+		return $this->errors;
+	}
+	
+	public function getName() {
+		return $this->name;
+	}
+	
+	public function getLabel() {
+		return $this->label;
+	}
+	
+	public function getDefaultValue() {
+		return $this->defaultValue;
+		
+	}
+	
+	
+	
+	
+	
+	
+	public function compileCss() {
+		return " " . $this->name . " " . implode(" ", $this->cssClasses) . " ";
+	}
+	
 	
 
 	
@@ -50,14 +85,14 @@ class Field {
 	}
 
 	// initailize custom validators and transformers here
-	public function init() {	
+	public function init() {
+		$this->setRenderer(new RedBorderRenderer(new ClearDefaultRenderer()));	
 	}
 	
-	
-	
-	public function getName() {
-		return $this->name;
+public function setRenderer ($renderer) {
+		$this->renderer = $renderer;
 	}
+
 	
 	public function setDefaultValue($value) {
 		// first set the value, then toStorageFormat transforms it
@@ -111,10 +146,6 @@ class Field {
 		$this->value = $value;
 	}
 	
-	public function getValue() {
-		return $this->value;
-	}
-
 	public function hasErrors() {
 		return (count ($this->errors) > 0 ? true : false);
 	}
@@ -124,9 +155,12 @@ class Field {
 		return $this->errors[0];
 	}
 	
-	// get all errors
-	public function getErrors() {
-		return ($this->errors);
+	/**
+	 * @param $className the css class name
+	 */
+	public function hasClass($className) {
+		return in_array($className, $this->cssClasses);
+		
 	}
 	
 	public function toDisplayFormat() {
@@ -172,28 +206,39 @@ class Field {
 	}
 	
 	// override this function to create a custom label (or non label at all):
-	protected function labelHtml() {
+	public function labelHtml() {
 		return "<label  for='". $this->name . "'>" . $this->label . "</label>";
 	}
 	
-	/** get the html for a field including its attributes:
-	 * just return the rendered field and its value
-	 */
-	public function toHtml() {
-		$return .= "<input type='" . $this->type . "' name='" . $this->name . "' id='".$this->name . "' class='" . $this->compileCss() . "' value='" . $this->toDisplayFormat($this->getValue()) . "' />";
+	public function defaultHtml() {
+		$return .= "<input type='" . $this->getType() . "' name='" . $this->getName() . "' id='".$this->getName() . "' class='" . $this->compileCss() . "' value='" . $this->toDisplayFormat($this->getValue()) . "' />";
 		return $return;
 	}
 	
+	public final function toHtml() {
+		$html = "";
+		if ($this->renderer) {
+			$html = $this->renderer->toHtml($this);
+		}
+		return $html ? $html : $this->defaultHtml();
+	}
+	
+	public function addClass($className) {
+		$this->cssClasses[] = $className;
+	}
+	
 	/*
-	 * renders the whole field, including surrounding validator js config asf.
+	 * renders the whole field. If no renderer is specified, use the 
+	 * default implementation
+	 * $
 	 * Only override if really necessary - use toHtml() instead.
 	 */
-	public function render() {
+	public function defaultRender() {
 		$hasErrorCss = $this->hasErrors() ? " error " : "";
-		$return = "<div class='wrapper " . $this->name . $hasErrorCss . "'>";
+		$return = "<div class='wrapper " . $this->getName . $hasErrorCss . "'>";
 		$return .= $this->labelHtml();
-		$return .="<a name='". $this->name."'></a>";
-		$return.=$this->toHtml();
+		$return .="<a name='". $this->getName()."'></a>";
+		$return.=$this->toHtml($element);
 		
 		if ($this->hasErrors()) {
 			$return .= "<span class='error'>" . $this->getError() . "</span>";
@@ -201,6 +246,16 @@ class Field {
 		
 		$return .= "</div>";
 		return $return;
+	}
+	
+	public function render() {
+		if ($this->renderer) {
+			$html = $this->renderer->render($this);
+		} else {
+			$html = $this->defaultRender();
+		}
+		return $html;
+		
 	}
 }
 

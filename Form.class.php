@@ -1,11 +1,14 @@
 <?php
 require_once('/field/Submit.php');
+require_once('/renderer/DefaultRenderer.php');
 class Form {
 	protected $fields = array();
 	protected $errorMessage= "Errors occured";
 	protected $name = 'form';
 	protected $method = "post";
 	protected $action = "";
+	
+	protected $renderer = null;
 
 	protected $errors = array();
 
@@ -14,49 +17,50 @@ class Form {
 		$this->action = $action;
 		$this->method = $method;
 	}
+
+	
 	
 	public function setName($name) {
 		$this->name = $name;
 	}
-	
+
 	public function setMethod($method) {
 		$this->method = $method;
 	}
-	
+
 	public function setAction ($action) {
 		$this->action = $action;
 	}
-	
+
 	public function startForm() {
-		echo 'start';
 		return "<form action='" . $this->action ."' method='" . $this->method . "' id='".$this->name."'>";
 	}
-	
+
 	public function endForm() {
 		return "</form>";
 	}
-	
+
 	public function hasErrors() {
 		return  count($this->errors)> 0 ? true : false;
 	}
 
 	public function isSubmitted() {
-		return isset($_REQUEST[$this->name]);
+		return isset($_REQUEST[$this->name]); 
 	}
 
 	public function addField ($field) {
 		$this->fields[$field->getName()] = $field;
 		return $this;
 	}
-	
+
 	public function getFields() {
 		return $this->fields;
 	}
-	
+
 	public function getField($name) {
 		return $this->fields[$name];
 	}
-	
+
 	public function getName() {
 		return $this->name;
 	}
@@ -64,17 +68,15 @@ class Form {
 	public function validate() {
 		$formValid = true;
 		foreach ($this->fields as $field) {
-			
 			if ($field->validate()==false) {
 				$formValid = false;
-				echo 'error on field: ' . $field->getName();
 				// just collect the main error of the current field:
 				$this->errors[$field->getName()] = $field->getError();
 			}
 		}
 		/* 	at this point we have to transform the form to the storage format:
 		 *  note that the render() method will display the form again correctly,
-		 *  if it is displayed correctly.
+		 *  if it contains errors.
 		 */
 		// TODO is there a simpler solution around ???
 		$this->toStorageFormat();
@@ -86,7 +88,7 @@ class Form {
 			$field->setValue($_REQUEST[$field->getName()]);
 		}
 	}
-	
+
 	public function hide($additionalHtml) {
 		$html .= "<form action='" . $this->action ."' method='" . $this->method . "' id='".$this->name."'>";
 		foreach ($this->fields as $field) {
@@ -96,14 +98,18 @@ class Form {
 	}
 
 	public function renderErrors() {
-		$html="";
-		$html.="<span class='caption'>Folgende Felder prüfen:</span>";
-		$html.="<ul class='error'>";
-		foreach ($this->errors as $fieldName => $error) {
-			$html.="<li><a href='#".$fieldName."'>". "<strong>" . $fieldName . "</strong>: " . $error . "</a></li>";
+		if ($this->hasErrors()) {
+			$html="";
+			$html.="<span class='caption'>Folgende Felder prüfen:</span>";
+			$html.="<ul class='error'>";
+			foreach ($this->errors as $fieldName => $error) {
+				$html.="<li><a href='#".$fieldName."'>". "<strong>" . $fieldName . "</strong>: " . $error . "</a></li>";
+			}
+			$html.="</ul>";
+			return $html;
+		} else {
+			return '';
 		}
-		$html.="</ul>";
-		return $html;
 	}
 
 	// maion mehthod: fills and draws the whole form:
@@ -139,11 +145,12 @@ class JSForm extends Form {
 		$json = '{';
 		$jsMessages = '';
 		$jsRules = '';
-		$jsConfig = array( "rules" => "", "messages" => array());
+		$jsConfig = array( "errorElement" => "span", "rules" => "", "messages" => array());
 
 		foreach ($this->fields as $field) {
 			$validatorJs = array();
 			$validators = $field->getValidators();
+			
 			foreach ($validators as $validator) {
 				$validatorJs = $validator->getJS($validatorJs);
 			}
@@ -156,6 +163,7 @@ class JSForm extends Form {
 		$script = '<script>';
 		$script .='$(document).ready(function(){';
 		$script .= '$("#'.$this->name.'").validate(';
+		
 		$json = json_encode($jsConfig);
 		$script.=$json;
 		$script .=")";
@@ -163,7 +171,7 @@ class JSForm extends Form {
 		$script.="</script>";
 		return $script;
 	}
-	
+
 	public function startForm() {
 		$start = $this->getJQueryValidation() . parent::startForm();
 		return $start;
@@ -172,19 +180,21 @@ class JSForm extends Form {
 
 
 // injects a form in the parsed html code.
-// Acts as a dec
-//orator, forwarding all method calls to the 
-// target.
+// Because the form class is unknown at compile-time, we
+// cannot subclass it. Therefore we redirect all method calls
+// to the target form. Only the render() method will
+// call the parser again, to ouptut the form in the respective html document.
+// ParserForm should never be instantiated directly: Retrieve it by $parser->getForm()
 class ParserForm {
-	
+
 	private $targetForm;
 	private $parser;
-	
+
 	public function __construct($form, $parser) {
 		$this->targetForm = $form;
 		$this->parser = $parser;
 	}
-	
+
 	// delegate function call to the target object:
 	public function __call($functionName, $args) {
 		return call_user_func_array(array($this->targetForm, $functionName), $args);
@@ -195,9 +205,7 @@ class ParserForm {
 		} else {
 			return $this->targetForm->render();
 		}
-		
 	}
-	
 }
 
 
@@ -208,62 +216,61 @@ class CinForm  {
 	private $processCinField = false;
 	private $skipTags = array();
 	private $processLevel = 0;
-	
 	private $renderOutput = "";
-	
 	protected $template = "../config/formConfig.xml";
 	protected $currentCinField = null;
-	
-	
+
+
 	protected $specialClassNames = array(
+		'text' => array('class' => 'TextClearDefault', 'file' => 'TextClearDefault.php'),
 		'textarea' => array('class' => 'Textarea', 'file' => 'TextArea.php' ),
 		'select' => array('class' => 'Select', 'file' => 'FieldGroup.php'),
 		'radio' => array('class' => 'Radio', 'file' => 'FieldGroup.php')
 	);
-	
+
 	protected $form = null;
-	
+
 	public function __construct($path='') {
 		$this->setConfig($path);
 		$this->init();
 	}
-	
+
 	public function setConfig($path) {
 		$this->template = $path;
 	}
-	
+
 	public function init() {
-		
-		
 		// first, we load all cinFields and construct the form:
 		$dom = new DOMDocument();
 		$dom->load($this->template);
 		$xp = new DomXPath($dom);
 		// get form attributes and cinFields by xpath:
 		$formConfigs = $xp->query('//cinForm');
-		
+
 		// we cannot access linked domNodes with $formConfig = $formConfigs[0], so use break:
 		// (there is only one form tag per document)
 		foreach ($formConfigs as $formConfig) {
 			break;
 		}
+
 		$className = $formConfig->getAttribute('type');
 		if (! $className) {
 			$className = 'Form';
-		} 
+		}
+		echo $className;
 		$this->form = new $className;
 		$this->form->setName($formConfig->getAttribute('name'));
 		$this->form->setAction($formConfig->getAttribute('action'));
 		$this->form->setMethod($formConfig->getAttribute('method'));
-		
-		
+
+
 		// find all fields and add them to the form:
 		$fieldConfigs = $xp->query('//cinField', $formConfig);
 		foreach ($fieldConfigs as $fieldConfig) {
 			// set up the field:
 			$typeName = $fieldConfig->getAttribute('type');
 			$fieldConfig->removeAttribute('type');
-	
+
 			if (!array_key_exists($typeName, $this->specialClassNames)) {
 				$className =  ucfirst($typeName) . 'Field';
 				$fileName = $typeName . '.php';
@@ -271,30 +278,30 @@ class CinForm  {
 				$className = $this->specialClassNames[$typeName]['class'];
 				$fileName = $this->specialClassNames[$typeName]['file'];
 			}
-			
+				
 			require_once('/field/' . $fileName);
 			$name = $fieldConfig->getAttribute('name');
 			$default = $fieldConfig->getAttribute('default');
 			$label = $fieldConfig->getAttribute('label');
 			$field = new $className($name, $label, $default);
-			
+				
 			// remove default attributes before processing other attributes
 			foreach (array('name','default','label') as $name){
 				$fieldConfig->removeAttribute($name);
 			}
-			
+				
 			// calls the setter method for each attribute:
 			foreach ($fieldConfig->attributes as $name => $value) {
 				$call = 'set' . ucfirst($name);
 				$field->$call($value->value);
 			}
-			
+				
 			// process validators:
 			$validators = $fieldConfig->getElementsByTagName('validator');
 			foreach ($validators as $validatorConfig) {
 				$className = ucfirst($validatorConfig->getAttribute('name')) . "Validator";
 				require_once('../validator/' . $className .".php");
-				
+
 				$validator = new $className();
 				$validatorConfig->removeAttribute('name');
 				// set up validator properly:
@@ -305,74 +312,73 @@ class CinForm  {
 					$validator->$call($v);
 				}
 				$field->addValidator($validator);
-			} 	
-			
+			}
+				
 			$options = $fieldConfig->getElementsByTagName('option');
 			$opts = array();
 			foreach ($options as $option) {
 				$opts[$option->getAttribute('name')] = $option->getAttribute('value');
 			}
-			
+				
 			if (count($opts)) {
 				$field->setOptions($opts);
-			} 	
-			
+			}
+				
 			$this->form->addField($field);
 		}
 	}
-	
-	
+
+
 	public function getForm() {
 		// bind the form to the parser
 		return new ParserForm($this->form, $this);
 	}
-	
-	public function render() { 
+
+	public function render() {
 		// reset render output
 		$this->renderOutput = '';
 		$this->parse();
 		return $this->renderOutput;
 	}
-	
-	
+
+
 	public function parse() {
 		$xml = xml_parser_create( );
 		xml_set_object($xml, $this);
 		xml_set_element_handler($xml, 'open', 'close');
 		xml_set_character_data_handler($xml, 'cdata');
 		xml_parser_set_option($xml, XML_OPTION_CASE_FOLDING, false);
-		
+
 		$fp = fopen($this->template, 'r');
 		$xmlStr = '';
 		while ($data = fread($fp, 4096)) {
 			$xmlStr .= $data;
 		} fclose($fp);
-		
+
 		xml_parse($xml, $xmlStr, true);
 		xml_parser_free($xml);
 		return $this;
 	}
-	
+
 	public function open($parser, $tag, $attributes) {
 		$this->processLevel++;
 		// skip the root, or fields which are not preocessable:
-		if ($this->processLevel==1 || in_array($tag, $this->skipTags)) {	
+		if ($this->processLevel==1 || in_array($tag, $this->skipTags)) {
 			return;
 		}
-		
+
 		// output all other tags 'as-is'
 		// however, single tags (e.g. <hr />) will be displayed as <hr></hr>
-		
+
 		if ($tag=='cinForm') {
 			$this->renderOutput .= $this->form->startForm();
-		
+
 		} else if ($tag=='cinField') {
 			$this->currentCinField = $attributes['name'];
 			$this->processCinField = true;
 		} else if ($tag=='cinErrors') {
 			$this->renderOutput .= $this->form->renderErrors();
-			// 1. do not output close this tag
-			// 2. skip it when showing up again.
+			// 1. do not close and dont show this tag again:
 			$this->skipTags[] = 'cinErrors';
 		} else if ($tag != 'cinField' && $tag!='cinErrors' && ! $this->processCinField) {
 			$attr = '';
@@ -383,19 +389,17 @@ class CinForm  {
 			$this->renderOutput .= ($attr!='' ? "<" . $tag . " " . $attr . " >" : "<" . $tag . ">");
 		}
 	}
-	
+
 	public function cdata($parser, $text) {
 		$this->renderOutput .= $text;
 	}
-	
+
 	public function close($parser, $tag) {
-		
-	
-		// skip root tag and not processing tags:
+		// skip root tag and non processing tags:
 		if ($this->processLevel==1 || in_array($tag, $this->skipTags)) {
 			return;
 		}
-		
+
 		if ($tag=='cinForm') {
 			$submit = new SubmitField($this->form->getName());
 			$this->renderOutput .= $submit->render();
@@ -409,7 +413,7 @@ class CinForm  {
 		}
 		$this->processLevel--;
 	}
-	
+
 }
 
 

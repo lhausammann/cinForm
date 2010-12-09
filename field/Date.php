@@ -6,6 +6,7 @@ require_once('../transformer/TimestampTransformer.php');
 
 class DateField extends Field {
 	public function init() {
+		parent::init();
 		$this->addValidator (new RegexValidator("/^[0-9]{2}\.[0-9]{2}\.[0-9]{4}$/", "Date has to be in the format: dd.mm.yyyy"));
 		$this->addTransformer (new TimestampTransformer());
 	}
@@ -14,7 +15,7 @@ class DateField extends Field {
 	// this prevents problem when adding/removing transforers at runtime.
 	// timestamp or date
 	public function setStorageFormat($timestampOrDate) {
-		echo $this->defaultValue;
+		//echo $this->getDefaultValue();
 		if ($timestampOrDate == 'timestamp') {
 			$this->removeTransformer('date');
 			$this->removeTransformer('timestamp');

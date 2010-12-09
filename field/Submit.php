@@ -3,11 +3,9 @@
 // of the form
 require_once('Field.php');
 class SubmitField extends Field {
-	public function toHtml() {
+	protected $type="submit";
+	public function defaultHtml() {
 		$html = "<input type='submit' name='" . $this->name . "' />";
 		return $html;
-	}
-	public function render() {
-		return $this->toHtml();
 	}
 }

@@ -51,7 +51,7 @@ class Option {
 }
 
 class FieldGroup extends Field {
-
+	protected $type="multi";
 	public function __construct($name, $label='', $values = array()) {
 		parent::__construct($name, $label);
 		if ($values) {
@@ -66,7 +66,7 @@ class FieldGroup extends Field {
 	}
 	
 	
-public function toHtml() {
+public function defaultHtml() {
 		$return .= "<select name='".$this->name .  "' id='".$this->name."' class='".$this->name."'>";
 		foreach ($this->options as $option) {
 			if ($option->value==$this->value) {
@@ -85,6 +85,7 @@ class Select extends FieldGroup {}
 
 class Radio extends Field {
 public function __construct($name, $label='', $options = null) {
+	parent::__construct($name, $label);
 	$this->name = $name;
 	
 	if (count($options) > 0) {
@@ -100,9 +101,9 @@ foreach ($options as $legend => $value) {
 }
 //  do not display a label on a radio group
 // (every button has its own label:
-protected function labelHtml() {}
+public function labelHtml() {}
 
-public function toHtml() {
+public function defaultHtml() {
 		foreach ($this->options as $option) {
 			if ($option->value==$this->value) {
 				$option->selected = true;
