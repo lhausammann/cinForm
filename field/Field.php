@@ -3,6 +3,7 @@ require_once( '../validator/RequiredValidator.php');
 require_once( '../transformer/EntitiesTransformer.php');
 require_once( '../renderer/ClearDefaultRenderer.php' );
 require_once( '../renderer/RedBorderRenderer.php' );
+require_once( '../renderer/RedBorderRenderer.php' );
 
 class Field {
 	const DISPLAY_FORMAT = 1;
@@ -86,7 +87,13 @@ class Field {
 
 	// initailize custom validators and transformers here
 	public function init() {
-		$this->setRenderer(new RedBorderRenderer(new ClearDefaultRenderer()));	
+		$this->setRenderer(new RedBorderRenderer(
+			new RedBorderRenderer(
+				//new DivRenderer(
+				//	new ClearDefaultRenderer()
+				//)
+			)
+		));	
 	}
 	
 public function setRenderer ($renderer) {
@@ -229,7 +236,8 @@ public function setRenderer ($renderer) {
 	
 	/*
 	 * renders the whole field. If no renderer is specified, use the 
-	 * default implementation
+	 * default 
+
 	 * $
 	 * Only override if really necessary - use toHtml() instead.
 	 */

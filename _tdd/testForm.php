@@ -39,7 +39,9 @@ $form->addField(new Field('textfeld', 'Bitte Text eingeben', 'hello World'))
 				echo "Vielen Dank für Ihre Angaben.";
 			}
 	}
-
+	$form->render();
+	
+	
 	$start = microtime(true);
 	$formParser = new CinForm(getenv('DOCUMENT_ROOT') . '/Form/config/formConfig.xml');
 	$form = $formParser->getForm();
