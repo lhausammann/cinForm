@@ -11,9 +11,6 @@ class DateField extends Field {
 		$this->addTransformer (new TimestampTransformer());
 	}
 	
-	// @TODO; only set defaults ($form->setDefaults)on the form, do not handle in fields.
-	// this prevents problem when adding/removing transforers at runtime.
-	// timestamp or date
 	public function setStorageFormat($timestampOrDate) {
 		//echo $this->getDefaultValue();
 		if ($timestampOrDate == 'timestamp') {

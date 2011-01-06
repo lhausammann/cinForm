@@ -55,11 +55,6 @@ class Field {
 		
 	}
 	
-	
-	
-	
-	
-	
 	public function compileCss() {
 		return " " . $this->name . " " . implode(" ", $this->cssClasses) . " ";
 	}
@@ -87,16 +82,9 @@ class Field {
 
 	// initailize custom validators and transformers here
 	public function init() {
-		$this->setRenderer(new RedBorderRenderer(
-			new RedBorderRenderer(
-				//new DivRenderer(
-				//	new ClearDefaultRenderer()
-				//)
-			)
-		));	
 	}
 	
-public function setRenderer ($renderer) {
+	public function setRenderer ($renderer) {
 		$this->renderer = $renderer;
 	}
 
@@ -191,6 +179,8 @@ public function setRenderer ($renderer) {
 		return $value;
 	}
 	
+	
+	
 	public function validate() {
 		if (count($this->validators)) {
 			foreach ($this->validators as $validator) {
@@ -223,47 +213,21 @@ public function setRenderer ($renderer) {
 	}
 	
 	public final function toHtml() {
-		$html = "";
-		if ($this->renderer) {
-			$html = $this->renderer->toHtml($this);
-		}
-		return $html ? $html : $this->defaultHtml();
+		return $this->defaultHtml();
 	}
 	
 	public function addClass($className) {
 		$this->cssClasses[] = $className;
 	}
 	
-	/*
-	 * renders the whole field. If no renderer is specified, use the 
-	 * default 
-
-	 * $
-	 * Only override if really necessary - use toHtml() instead.
-	 */
-	public function defaultRender() {
-		$hasErrorCss = $this->hasErrors() ? " error " : "";
-		$return = "<div class='wrapper " . $this->getName . $hasErrorCss . "'>";
-		$return .= $this->labelHtml();
-		$return .="<a name='". $this->getName()."'></a>";
-		$return.=$this->toHtml($element);
-		
-		if ($this->hasErrors()) {
-			$return .= "<span class='error'>" . $this->getError() . "</span>";
-		}
-		
-		$return .= "</div>";
-		return $return;
-	}
 	
 	public function render() {
 		if ($this->renderer) {
-			$html = $this->renderer->render($this);
+			$html = $this->renderer->renderElement ($this);
 		} else {
-			$html = $this->defaultRender();
+			$html = $this->toHtml();
 		}
-		return $html;
-		
+		return $html;	
 	}
 }
 

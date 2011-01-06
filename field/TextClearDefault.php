@@ -1,5 +1,6 @@
 <?php
 class TextClearDefault extends Field {
+	
 	public function defaultHtml() {
 		$empty = "''";
 		$default = "'" . addslashes($this->defaultValue) . "'";

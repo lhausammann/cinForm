@@ -17,6 +17,10 @@ class Form {
 		$this->action = $action;
 		$this->method = $method;
 	}
+	
+	public function setRenderer($renderer) {
+		$this->renderer = $renderer;	
+	}
 
 	
 	
@@ -50,6 +54,7 @@ class Form {
 
 	public function addField ($field) {
 		$this->fields[$field->getName()] = $field;
+		$field->setRenderer($this->renderer);
 		return $this;
 	}
 
@@ -123,7 +128,7 @@ class Form {
 			$html.=$field->render();
 		}
 		// add submit button
-		$submit = new SubmitField();
+		$submit = new SubmitField(null);
 		$submit->setName($this->name);
 		$html.= $submit->render();
 		$html.=$this->endForm();
@@ -199,6 +204,15 @@ class ParserForm {
 	public function __call($functionName, $args) {
 		return call_user_func_array(array($this->targetForm, $functionName), $args);
 	}
+	
+	// overwrite all existing renderers in the form:
+	public function setRenderer($renderer) {
+		foreach ($this->targetForm->getFields() as $field ) {
+			$field->setRenderer($renderer);
+		}
+		
+	}
+	
 	public function render() {
 		if ($this->parser) {
 			return $this->parser->render();
@@ -263,6 +277,8 @@ class CinForm  {
 		$this->form->setAction($formConfig->getAttribute('action'));
 		$this->form->setMethod($formConfig->getAttribute('method'));
 
+		// find 
+		// foreach ($formConfig->getElementsByTagName('renderer'))
 
 		// find all fields and add them to the form:
 		$fieldConfigs = $xp->query('//cinField', $formConfig);
@@ -278,7 +294,9 @@ class CinForm  {
 				$className = $this->specialClassNames[$typeName]['class'];
 				$fileName = $this->specialClassNames[$typeName]['file'];
 			}
-				
+			
+			
+			
 			require_once('/field/' . $fileName);
 			$name = $fieldConfig->getAttribute('name');
 			$default = $fieldConfig->getAttribute('default');

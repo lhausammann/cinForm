@@ -29,8 +29,14 @@
 			</script>
 		</head>
 		<body>
-	<cinForm name="helloWorldForm" action="" method="post" type="Form">
-	
+	<cinForm name="helloWorldForm" action="" method="post" type="JSForm">
+		<renderer name="redborder">	
+			<renderer name="div">
+				<renderer name="cleardefault" />
+			</renderer>
+		</renderer>
+			
+		
 		<h1>hello form!</h1>
 	
 	
@@ -75,10 +81,7 @@
 		<cinField type='select' name="select" label="select">
 			<option name="hallo" value="hello" />
 			<option name="Welt" value="World" />
-		</cinField>
-		
-		<!-- use a datasouce, which is attached to the form using setVar -->
-		
+		</cinField>		
 		
 		<hr />
 	</cinForm>

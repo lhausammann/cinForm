@@ -6,11 +6,11 @@ require_once('./../field/FieldGroup.php');
 require_once ('./../validator/LengthValidator.php');
 require_once ('./../validator/NumericValidator.php');
 require_once('./../form.class.php');
-
-//$form = new JSForm('helloWorldForm');
+require_once('./../renderer/DivRenderer.php');
+$form = new JSForm('helloWorldForm');
 
 // we need some serverside tests -> use the non - js form:
-$form = new Form('helloWorldForm_old');
+//$form = new Form('helloWorldForm_old');
 
 $textarea = new TextArea('Text','Zwischen 5 und 15 Zeichen','');
 $textarea->addValidator(new LengthValidator(5,15));
@@ -21,6 +21,8 @@ $form->addField($textarea);
 $intField = new Field("intfeld", "Bitte Integer eingeben", "hallo Integer");
 $intField->addValidator(new IntValidator());
 
+
+/*
 $form->addField(new Field('textfeld', 'Bitte Text eingeben', 'hello World'))
 	->addField(new DateField('datumsfeld','Bitte Datum eingeben', '17.03.1980'))
 	->addField($textarea)
@@ -39,12 +41,29 @@ $form->addField(new Field('textfeld', 'Bitte Text eingeben', 'hello World'))
 				echo "Vielen Dank für Ihre Angaben.";
 			}
 	}
-	$form->render();
-	
-	
+	echo 'render:';
+	?>
+
+	<?php 	echo $form->render(); ?>
+	<?php
+	*/
 	$start = microtime(true);
 	$formParser = new CinForm(getenv('DOCUMENT_ROOT') . '/Form/config/formConfig.xml');
+	
+	
 	$form = $formParser->getForm();
+	
+	
+	$form->setRenderer(
+		new DivRenderer(
+			new RedBorderRenderer(
+				new RedBorderRenderer(
+					new ClearDefaultRenderer()
+				)
+			)
+		)
+	);
+	
 	$isOk = false;
 	
 	// validate the form:
@@ -65,11 +84,11 @@ $form->addField(new Field('textfeld', 'Bitte Text eingeben', 'hello World'))
 		
 		<?php
 	} else {
-		echo $formParser->render();
+		echo $form->render();
 	}
-	
-	echo microtime(true)-$start;
+
 	
 //include('testForm_tpl.php');
 
 
+	

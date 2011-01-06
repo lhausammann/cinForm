@@ -1,8 +1,9 @@
 
 <?php
-require_once('../renderer/DefaultRenderer.php');
-class ClearDefaultRenderer extends DefaultRenderer {
-	public function toHtml($element) {
+require_once('../renderer/BaseRenderer.php');
+class ClearDefaultRenderer extends BaseRenderer {
+	// replace base implementation on text fields:
+	public function renderElement($element) {
 		if ($element->getType()=='text') {
 			echo 'clearDefault' . $element->getType();
 			$empty = "''";
@@ -14,9 +15,7 @@ class ClearDefaultRenderer extends DefaultRenderer {
 			return $return;
 		} else {
 			// fall back to the default implementation:
-			echo 'using default';
-			
-			return $this->defaultHtml($element);
+			return parent::renderElement($element);
 		}
 	}
 }

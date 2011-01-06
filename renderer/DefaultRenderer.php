@@ -18,6 +18,7 @@ class DefaultRenderer {
 	
 	protected function toHtml($element) {
 		if ($this->renderer) {
+			
 			return $this->renderer->toHtml($element);
 		} else {
 			return $this->defaultHtml($element);
