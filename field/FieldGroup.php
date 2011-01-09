@@ -80,7 +80,7 @@ public function defaultHtml() {
 }
 
 // alias
-class Select extends Field_FieldGroup {}
+class Field_Select extends Field_FieldGroup {}
 
 class Field_Radio extends Field_FieldGroup {
 public function __construct($name, $label='', $options = null) {

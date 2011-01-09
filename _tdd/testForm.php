@@ -1,7 +1,7 @@
 <?php
 define( APPLICATION_DIR, '/Form/');
 define (ENABLE_AUTOLOAD, true);
-set_include_path($_SERVER['DOCUMENT_ROOT'] . APPLICATION_DIR);
+
 
 
 
@@ -43,12 +43,12 @@ $form->addField(new Field_Text('textfeld', 'Bitte Text eingeben', 'hello World')
 	}
 
 	
-	
+	echo 'parsing';
 	$start = microtime(true);
-	// $formParser = new CinForm(getenv('DOCUMENT_ROOT') . '/Form/config/formConfig.xml');
+	$formParser = new CinForm(getenv('DOCUMENT_ROOT') . '/Form/config/formConfig.xml');
 	
 	
-	//$form = $formParser->getForm();
+	$form = $formParser->getForm();
 	
 	// $form = new Form();
 	$form->setRenderer(

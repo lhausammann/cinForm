@@ -1,7 +1,7 @@
 <?php
 
 // depends on: required validator, entities transformer.
-require_once( '../transformer/EntitiesTransformer.php');
+
 
 
 class Field_Base {

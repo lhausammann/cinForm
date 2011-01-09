@@ -1,5 +1,6 @@
 <?php
 /** autoload stuff */
+set_include_path($_SERVER['DOCUMENT_ROOT'] . APPLICATION_DIR);
 if (ENABLE_AUTOLOAD) {
 	function __autoload($name) {
 		$filepath = str_replace ('_', '/', $name);
@@ -7,6 +8,7 @@ if (ENABLE_AUTOLOAD) {
 		require_once($filepath . '.php');
 	}
 }
+
 
 
 
@@ -252,10 +254,10 @@ class CinForm  {
 
 
 	protected $specialClassNames = array(
-		'text' => array('class' => 'TextClearDefault', 'file' => 'TextClearDefault.php'),
-		'textarea' => array('class' => 'Textarea', 'file' => 'TextArea.php' ),
-		'select' => array('class' => 'Select', 'file' => 'FieldGroup.php'),
-		'radio' => array('class' => 'Radio', 'file' => 'FieldGroup.php')
+		'text' => array('class' => 'Field_TextClearDefault', 'file' => 'TextClearDefault.php'),
+		'textarea' => array('class' => 'Field_Textarea', 'file' => 'TextArea.php' ),
+		'select' => array('class' => 'Field_Select', 'file' => 'FieldGroup.php'),
+		'radio' => array('class' => 'Field_Radio', 'file' => 'FieldGroup.php')
 	);
 
 	protected $form = null;
@@ -304,7 +306,8 @@ class CinForm  {
 			$fieldConfig->removeAttribute('type');
 
 			if (!array_key_exists($typeName, $this->specialClassNames)) {
-				$className =  ucfirst($typeName) . 'Field';
+				//$className =  ucfirst($typeName) . 'Field';
+				$className = "Field_" . ucfirst($typeName);
 				$fileName = $typeName . '.php';
 			} else {
 				$className = $this->specialClassNames[$typeName]['class'];
@@ -313,7 +316,7 @@ class CinForm  {
 				
 				
 				
-			require_once('/field/' . $fileName);
+			// require_once('/field/' . $fileName);
 			$name = $fieldConfig->getAttribute('name');
 			$default = $fieldConfig->getAttribute('default');
 			$label = $fieldConfig->getAttribute('label');
@@ -333,8 +336,10 @@ class CinForm  {
 			// process validators:
 			$validators = $fieldConfig->getElementsByTagName('validator');
 			foreach ($validators as $validatorConfig) {
-				$className = ucfirst($validatorConfig->getAttribute('name')) . "Validator";
-				require_once('../validator/' . $className .".php");
+				
+				$className =  'Validator_' . ucfirst($validatorConfig->getAttribute('name'));
+				//$className = ucfirst($validatorConfig->getAttribute('name')) . "Validator";
+				//require_once('../validator/' . $className .".php");
 
 				$validator = new $className();
 				$validatorConfig->removeAttribute('name');
@@ -435,7 +440,7 @@ class CinForm  {
 		}
 
 		if ($tag=='cinForm') {
-			$submit = new SubmitField($this->form->getName());
+			$submit = new Field_Submit($this->form->getName());
 			$this->renderOutput .= $submit->render();
 			$this->renderOutput .= "</form>";
 		} else if ($tag != 'cinField' && ! $this->processCinField) {

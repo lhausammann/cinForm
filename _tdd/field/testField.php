@@ -1,8 +1,11 @@
 <?php 
 
+define( APPLICATION_DIR, '/Form/');
+define (ENABLE_AUTOLOAD, true);
+
+require_once('../../Form.class.php');
 require_once('../simpletest/autorun.php');
-require_once('../../field/Field.php');
-require_once('../../validator/RequiredValidator.php');
+
 
 class FieldTestCase extends UnitTestCase {
     function FieldTestCase() {
@@ -16,7 +19,7 @@ class FieldTestCase extends UnitTestCase {
     }
     
     function testFieldValidatesWithoutValidatorsSet() {
-		$field = new Field();
+		$field = new Field_Base('test');
 		
 		$field->setValue("fieldvalue");
 		
@@ -31,16 +34,16 @@ class FieldTestCase extends UnitTestCase {
     }
     
     function testRequiredField() {
-    	$field = new Field();
+    	$field = new Field_Base('test');
     	// $field->setErrorMessage("test error msg");
-    	$field->addValidator(new RequiredValidator());
+    	$field->addValidator(new Validator_Required());
     	// $this->assertFalse($field->validate());
     	$field->setValue('asdf');
     	$this->assertEqual($field->validate(), true);
     }
 }
 
-$field = new Field();
+$field = new Field_Base('test');
 $field->setName("testfeld");
 $field->setLabel("TestFeld");
 $field->setValue("hallo");
