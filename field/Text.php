@@ -1,2 +1,2 @@
 <?php
-class TextField extends Field { }
+class Field_Text extends Field_Base { }

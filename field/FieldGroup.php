@@ -1,6 +1,5 @@
 <?php 
 
-require_once('Field.php');
 
 class Option {
 	public $name='';
@@ -50,7 +49,7 @@ class Option {
 	}
 }
 
-class FieldGroup extends Field {
+class Field_FieldGroup extends Field_Base {
 	protected $type="multi";
 	public function __construct($name, $label='', $values = array()) {
 		parent::__construct($name, $label);
@@ -81,9 +80,9 @@ public function defaultHtml() {
 }
 
 // alias
-class Select extends FieldGroup {}
+class Select extends Field_FieldGroup {}
 
-class Radio extends Field {
+class Field_Radio extends Field_FieldGroup {
 public function __construct($name, $label='', $options = null) {
 	parent::__construct($name, $label);
 	$this->name = $name;

@@ -15,7 +15,7 @@ interface IValidator {
 
 
 // Base class implementation
-abstract class Validator implements IValidator {
+abstract class Validator_Base implements IValidator {
 	
 	
 	protected $errorMessage;

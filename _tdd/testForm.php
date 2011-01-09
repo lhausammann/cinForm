@@ -1,34 +1,34 @@
 <?php
-require_once('./../field/Field.php');
-require_once('./../field/Date.php');
-require_once('./../field/Textarea.php');
-require_once('./../field/FieldGroup.php');
-require_once ('./../validator/LengthValidator.php');
-require_once ('./../validator/NumericValidator.php');
+define( APPLICATION_DIR, '/Form/');
+define (ENABLE_AUTOLOAD, true);
+set_include_path($_SERVER['DOCUMENT_ROOT'] . APPLICATION_DIR);
+
+
+
 require_once('./../form.class.php');
-require_once('./../renderer/DivRenderer.php');
+
 $form = new JSForm('helloWorldForm');
 
 // we need some serverside tests -> use the non - js form:
 //$form = new Form('helloWorldForm_old');
 
-$textarea = new TextArea('Text','Zwischen 5 und 15 Zeichen','');
-$textarea->addValidator(new LengthValidator(5,15));
-
+$textarea = new Field_TextArea('Text','Zwischen 5 und 15 Zeichen','');
+$textarea->addValidator(new Validator_Length(5,15));
+//$textarea->setRTE(true);
 //$form->addField(new Field('textfeld', 'Bitte Text eingeben', 'hello World'));
 $form->addField($textarea);
 
-$intField = new Field("intfeld", "Bitte Integer eingeben", "hallo Integer");
-$intField->addValidator(new IntValidator());
+$intField = new Field_Base("intfeld", "Bitte Integer eingeben", "hallo Integer");
+$intField->addValidator(new Validator_Int());
 
 
-/*
-$form->addField(new Field('textfeld', 'Bitte Text eingeben', 'hello World'))
-	->addField(new DateField('datumsfeld','Bitte Datum eingeben', '17.03.1980'))
+
+$form->addField(new Field_Text('textfeld', 'Bitte Text eingeben', 'hello World'))
+	->addField(new Field_Date('datumsfeld','Bitte Datum eingeben', '17.03.1980'))
 	->addField($textarea)
-	->addField(new FieldGroup('test','Bitte Auswahl treffen
+	->addField(new Field_FieldGroup('test','Bitte Auswahl treffen
 	', array('Bitte wählen' => '', 1 => 1, 2 => 2, 3 => 3)))
-	->addField(new Radio('testr','testr', array(1 => 1, 2 => 2, 3 => 3)))
+	->addField(new Field_Radio('testr','testr', array(1 => 1, 2 => 2, 3 => 3)))
 	->addField($intField);
 	
 	
@@ -41,30 +41,28 @@ $form->addField(new Field('textfeld', 'Bitte Text eingeben', 'hello World'))
 				echo "Vielen Dank für Ihre Angaben.";
 			}
 	}
-	echo 'render:';
-	?>
 
-	<?php 	echo $form->render(); ?>
-	<?php
-	*/
+	
+	
 	$start = microtime(true);
-	$formParser = new CinForm(getenv('DOCUMENT_ROOT') . '/Form/config/formConfig.xml');
+	// $formParser = new CinForm(getenv('DOCUMENT_ROOT') . '/Form/config/formConfig.xml');
 	
 	
-	$form = $formParser->getForm();
+	//$form = $formParser->getForm();
 	
-	
+	// $form = new Form();
 	$form->setRenderer(
-		new DivRenderer(
-			new RedBorderRenderer(
-				new RedBorderRenderer(
-					new ClearDefaultRenderer()
+		new Renderer_Table(
+			new Renderer_RedBorder(
+				new Renderer_RedBorder(
+					new Renderer_ClearDefault()
 				)
 			)
 		)
 	);
 	
 	$isOk = false;
+	
 	
 	// validate the form:
 	if ($form->isSubmitted() || isset($_REQUEST['showAgain'])) {

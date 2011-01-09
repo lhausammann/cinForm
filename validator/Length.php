@@ -1,8 +1,6 @@
 <?php
-// base
-require_once('Validator.php');
 
-class LengthValidator extends Validator {
+class Validator_Length extends Validator_Base {
 	
 	protected $name = 'length';	
 	public $min = 1;

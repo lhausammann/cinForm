@@ -1,8 +1,6 @@
 <?php 
-// base
-require_once('Validator.php');
 
-class RequiredValidator extends Validator {
+class Validator_Required extends Validator_Base {
 	protected $name='required';
 	protected $errorMessage = "cannot be empty";
 

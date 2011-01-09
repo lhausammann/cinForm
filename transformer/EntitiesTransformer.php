@@ -1,6 +1,6 @@
 <?php
 // protects the displayed form from html:
-class EntitiesTransformer {
+class Transformer_Entities {
 	protected $name = 'entity';
 	public function getName() {
 		return $this->name;

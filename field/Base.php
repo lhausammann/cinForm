@@ -1,11 +1,10 @@
 <?php
-require_once( '../validator/RequiredValidator.php');
-require_once( '../transformer/EntitiesTransformer.php');
-require_once( '../renderer/ClearDefaultRenderer.php' );
-require_once( '../renderer/RedBorderRenderer.php' );
-require_once( '../renderer/RedBorderRenderer.php' );
 
-class Field {
+// depends on: required validator, entities transformer.
+require_once( '../transformer/EntitiesTransformer.php');
+
+
+class Field_Base {
 	const DISPLAY_FORMAT = 1;
 	const STORAGE_FORMAT = 2;
 	
@@ -17,10 +16,7 @@ class Field {
 	protected $hasErrors = "";
 	protected $cssClasses = array();
 	protected $defaultValue;
-	// contains information about the format of the field value:
-	// after validating the form
 	
-	public $fieldState = self::DISPLAY_FORMAT;
 	
 	// wether or not the required validator should be added:
 	protected $isOptional = false;
@@ -55,6 +51,10 @@ class Field {
 		
 	}
 	
+	public function fillFromRequest() {
+		$this->setValue($_REQUEST[$this->getName()]);
+	}
+	
 	public function compileCss() {
 		return " " . $this->name . " " . implode(" ", $this->cssClasses) . " ";
 	}
@@ -69,11 +69,11 @@ class Field {
 
 		
 		if ($isOptional==false) {
-			$this->addValidator(new RequiredValidator('please enter a value'));
+			$this->addValidator(new Validator_Required('please enter a value'));
 			$this->isOptional = false;
 		}
 		// the defaultg transformer escapes and unescapes html input
-		$this->addTransformer(new EntitiesTransformer());
+		$this->addTransformer(new Transformer_Entities());
 		$this->init();
 		
 		// after initing, we can set the default value properly:

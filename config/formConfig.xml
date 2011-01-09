@@ -30,11 +30,6 @@
 		</head>
 		<body>
 	<cinForm name="helloWorldForm" action="" method="post" type="JSForm">
-		<renderer name="redborder">	
-			<renderer name="div">
-				<renderer name="cleardefault" />
-			</renderer>
-		</renderer>
 			
 		
 		<h1>hello form!</h1>

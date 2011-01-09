@@ -1,6 +1,6 @@
 <?php
 // converts a timestamp to a date
-class TimestampTransformer {
+class Transformer_Timestamp {
 	protected $name = 'timestamp';
 	public function getName() {
 		return $this->name;

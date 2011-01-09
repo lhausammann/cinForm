@@ -1,6 +1,5 @@
 <?php 
-require_once('Validator.php');
-class RegexValidator extends Validator {
+class Validator_Regex extends Validator_Base {
 	protected $errorMessage = "Regex does not match"; 
 	protected $name='regex';
 	public $regex = '';
@@ -22,4 +21,3 @@ class RegexValidator extends Validator {
 		return (preg_match($this->regex, $value) > 0) ? true : false;
 	}
 }
-?>

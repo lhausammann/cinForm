@@ -1,13 +1,22 @@
 <?php
-require_once('/field/Submit.php');
-require_once('/renderer/DefaultRenderer.php');
+/** autoload stuff */
+if (ENABLE_AUTOLOAD) {
+	function __autoload($name) {
+		$filepath = str_replace ('_', '/', $name);
+		echo $filepath;
+		require_once($filepath . '.php');
+	}
+}
+
+
+
 class Form {
 	protected $fields = array();
 	protected $errorMessage= "Errors occured";
 	protected $name = 'form';
 	protected $method = "post";
 	protected $action = "";
-	
+
 	protected $renderer = null;
 
 	protected $errors = array();
@@ -17,13 +26,18 @@ class Form {
 		$this->action = $action;
 		$this->method = $method;
 	}
-	
+
 	public function setRenderer($renderer) {
-		$this->renderer = $renderer;	
+		// set the renderer to use in add field...
+		$this->renderer = $renderer;
+		// and overwrite existing renderer on fields:
+		foreach ($this->fields as $field) {
+			$field->setRenderer($renderer);
+		}
 	}
 
-	
-	
+
+
 	public function setName($name) {
 		$this->name = $name;
 	}
@@ -49,7 +63,7 @@ class Form {
 	}
 
 	public function isSubmitted() {
-		return isset($_REQUEST[$this->name]); 
+		return isset($_REQUEST[$this->name]);
 	}
 
 	public function addField ($field) {
@@ -90,7 +104,9 @@ class Form {
 
 	public function fillFromRequest() {
 		foreach ($this->fields as $field) {
-			$field->setValue($_REQUEST[$field->getName()]);
+			// TODO for composite fields:
+			$field->fillFromRequest();
+			// $field->setValue($_REQUEST[$field->getName()]);
 		}
 	}
 
@@ -128,7 +144,7 @@ class Form {
 			$html.=$field->render();
 		}
 		// add submit button
-		$submit = new SubmitField(null);
+		$submit = new Field_Submit(null);
 		$submit->setName($this->name);
 		$html.= $submit->render();
 		$html.=$this->endForm();
@@ -155,7 +171,7 @@ class JSForm extends Form {
 		foreach ($this->fields as $field) {
 			$validatorJs = array();
 			$validators = $field->getValidators();
-			
+				
 			foreach ($validators as $validator) {
 				$validatorJs = $validator->getJS($validatorJs);
 			}
@@ -168,7 +184,7 @@ class JSForm extends Form {
 		$script = '<script>';
 		$script .='$(document).ready(function(){';
 		$script .= '$("#'.$this->name.'").validate(';
-		
+
 		$json = json_encode($jsConfig);
 		$script.=$json;
 		$script .=")";
@@ -204,15 +220,15 @@ class ParserForm {
 	public function __call($functionName, $args) {
 		return call_user_func_array(array($this->targetForm, $functionName), $args);
 	}
-	
+
 	// overwrite all existing renderers in the form:
 	public function setRenderer($renderer) {
 		foreach ($this->targetForm->getFields() as $field ) {
 			$field->setRenderer($renderer);
 		}
-		
+
 	}
-	
+
 	public function render() {
 		if ($this->parser) {
 			return $this->parser->render();
@@ -277,7 +293,7 @@ class CinForm  {
 		$this->form->setAction($formConfig->getAttribute('action'));
 		$this->form->setMethod($formConfig->getAttribute('method'));
 
-		// find 
+		// find
 		// foreach ($formConfig->getElementsByTagName('renderer'))
 
 		// find all fields and add them to the form:
@@ -294,26 +310,26 @@ class CinForm  {
 				$className = $this->specialClassNames[$typeName]['class'];
 				$fileName = $this->specialClassNames[$typeName]['file'];
 			}
-			
-			
-			
+				
+				
+				
 			require_once('/field/' . $fileName);
 			$name = $fieldConfig->getAttribute('name');
 			$default = $fieldConfig->getAttribute('default');
 			$label = $fieldConfig->getAttribute('label');
 			$field = new $className($name, $label, $default);
-				
+
 			// remove default attributes before processing other attributes
 			foreach (array('name','default','label') as $name){
 				$fieldConfig->removeAttribute($name);
 			}
-				
+
 			// calls the setter method for each attribute:
 			foreach ($fieldConfig->attributes as $name => $value) {
 				$call = 'set' . ucfirst($name);
 				$field->$call($value->value);
 			}
-				
+
 			// process validators:
 			$validators = $fieldConfig->getElementsByTagName('validator');
 			foreach ($validators as $validatorConfig) {
@@ -331,17 +347,17 @@ class CinForm  {
 				}
 				$field->addValidator($validator);
 			}
-				
+
 			$options = $fieldConfig->getElementsByTagName('option');
 			$opts = array();
 			foreach ($options as $option) {
 				$opts[$option->getAttribute('name')] = $option->getAttribute('value');
 			}
-				
+
 			if (count($opts)) {
 				$field->setOptions($opts);
 			}
-				
+
 			$this->form->addField($field);
 		}
 	}

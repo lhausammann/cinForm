@@ -1,6 +1,6 @@
 <?php
-require_once('Field.php');
-class TextArea extends Field {
+
+class Field_TextArea extends Field_Base {
 	protected $rte = false;
 	protected $rows = 10;
 	protected $cols = 30;

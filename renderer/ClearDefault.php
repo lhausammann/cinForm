@@ -1,7 +1,5 @@
-
 <?php
-require_once('../renderer/BaseRenderer.php');
-class ClearDefaultRenderer extends BaseRenderer {
+class Renderer_ClearDefault extends Renderer_Base {
 	// replace base implementation on text fields:
 	public function renderElement($element) {
 		if ($element->getType()=='text') {

@@ -1,6 +1,5 @@
 <?php
-require_once('../renderer/DefaultRenderer.php');
-class DivRenderer extends BaseRenderer {
+class Renderer_Div extends Renderer_Base {
 	public function renderElement($element) {
 		$hasErrorCss = $element->hasErrors() ? " error " : "";
 		$return = "<div class='wrapper " . $element->getName() . " " . $hasErrorCss . "'>";

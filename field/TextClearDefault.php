@@ -1,5 +1,5 @@
 <?php
-class TextClearDefault extends Field {
+class Field_TextClearDefault extends Field_Base {
 	
 	public function defaultHtml() {
 		$empty = "''";
