@@ -13,7 +13,7 @@ class Field_Base {
 	protected $errors = array();
 	protected $name = '';
 	protected $label = '';
-	protected $hasErrors = "";
+	protected $hasErrors = false;
 	protected $cssClasses = array();
 	protected $defaultValue;
 	

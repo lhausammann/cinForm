@@ -44,6 +44,15 @@ class Field_Composite extends Field_Base {
 		return $html;
 	} 
 	
+	public function getError() {
+		$errorFields = array_filter ($this->fields, function($field) { 
+				return $field->hasErrors();
+		});
+		$errorFieldNames = array_map(function ($field) {return $field->getName();}, $errorFields);
+		$errorFieldString = implode (', ', $errorFieldNames);
+		return "Es sind Fehler in den folgenden Feldern aufgetreten:" . $errorFieldString;
+	}
+	
 	/* not possible to implement on composites: does nothing */
 	public function setDefaultValue() {
 		//throw new Exception ('Operation setDefaultValue() not implemented on composites.');
