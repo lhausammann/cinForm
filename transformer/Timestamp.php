@@ -5,9 +5,10 @@ class Transformer_Timestamp {
 	public function getName() {
 		return $this->name;
 	}
-	public function displayFormat($timestampOrInvalid, $field) {
+	public function displayFormat($timestampOrInvalid, $field = null) {
 		// only transform valid timestamps to the display format:
-		if ($field->hasErrors()==false) {
+		$hasErrors = $field ? $field->hasErrors() : false;
+		if ($hasErrors==false) {
 			return date('d.m.Y', $timestampOrInvalid);
 		} else {
 			// if the field contains errors,
@@ -17,9 +18,10 @@ class Transformer_Timestamp {
 		
 	}
 	
-	public function storageFormat($date, $field) {
+	public function storageFormat($date, $field = null) {
 		// only transform valid fields to the storage format:
-		if ($field->hasErrors()==false) {
+		$hasErrors = $field ? $field->hasErrors() : false;
+		if ($hasErrors==false) {
 			list ($day, $month, $year) = explode('.', $date);
 			return mktime(0, 0, 0, $month, $day, $year);
 		} 

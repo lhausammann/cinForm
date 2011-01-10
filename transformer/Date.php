@@ -9,8 +9,8 @@ class Transformer_Date {
 	public function displayFormat($dateOrInvalid, $field) {
 		// only transform valid mysql to the display format:
 		// (1980-17-03 => 17.03.1980)
-		
-		if ($field->hasErrors()==false) {
+		$hasErrors = $field ? $field->hasErrors() : false;
+		if ($field->hasErrors == false) {
 			list ($year, $month, $day) = explode('-', $dateOrInvalid);
 			//return mktime(0, 0, 0, $month, $day, $year);
 			$return = $day . '.' . $month. '.' . $year;

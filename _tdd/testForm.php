@@ -44,15 +44,30 @@ $form->addField(new Field_Text('textfeld', 'Bitte Text eingeben', 'hello World')
 
 	
 	echo 'parsing';
+	$form->setRenderer(
+		new Renderer_Div(
+			new Renderer_RedBorder(
+				new Renderer_RedBorder(
+					new Renderer_ClearDefault()
+				)
+			)
+		)
+	);
+	
+	
 	$start = microtime(true);
-	$formParser = new CinForm(getenv('DOCUMENT_ROOT') . '/Form/config/formConfig.xml');
-	
-	
-	$form = $formParser->getForm();
+	//$formParser = new CinForm(getenv('DOCUMENT_ROOT') . '/Form/config/formConfig.xml');
+	$composite = new Field_Composite('composite','composite');
+	$composite->addField(new Field_Text('text','cf'));
+	$composite->addField(new Field_Date('datetesta','testa','22.02.2022'));
+	$composite->addField(new Field_Textarea('texxt','texxt'));
+	$composite->setElementRenderer(new Renderer_RedBorder(new Renderer_Div()));
+	$form->addField($composite);
+	//$form = $formParser->getForm();
 	
 	// $form = new Form();
 	$form->setRenderer(
-		new Renderer_Table(
+		new Renderer_Div(
 			new Renderer_RedBorder(
 				new Renderer_RedBorder(
 					new Renderer_ClearDefault()
